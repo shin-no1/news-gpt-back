@@ -19,6 +19,6 @@ public class NewsController {
 
     @PostMapping("/analyze-url")
     public NewsResponseDto analyzeUrl(@RequestBody NewsRequestDto request) {
-        return newsService.analyze(request.getUrl());
+        return newsService.summarizeUrl(request.getUrl());
     }
 }
