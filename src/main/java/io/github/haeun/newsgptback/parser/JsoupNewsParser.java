@@ -11,6 +11,10 @@ import java.io.IOException;
 public class JsoupNewsParser {
     public NewsResponseDto parse(String url) {
         try {
+            if (!url.startsWith("https://n.news.naver.com/")) {
+                throw new RuntimeException("네이버 뉴스가 아닙니다.");
+            }
+
             Document doc = Jsoup.connect(url).get();
             String title = doc.title();
             String content = doc.select("#dic_area").text();
