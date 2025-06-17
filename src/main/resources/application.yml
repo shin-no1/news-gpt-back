@@ -1,8 +1,3 @@
 spring:
   application:
     name: news-gpt-back
-  datasource:
-    url: jdbc:mariadb://localhost:3306/admin
-    username: user
-    password: user
-    driver-class-name: org.mariadb.jdbc.Driver
