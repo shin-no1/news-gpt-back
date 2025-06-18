@@ -1,23 +1,12 @@
 package io.github.haeun.newsgptback.dto;
 
+import lombok.Data;
+
 import java.util.List;
 
+@Data
 public class GptResponseDto {
-    private List<Choice> choices;
-
-    public List<Choice> getChoices() {
-        return choices;
-    }
-
-    public static class Choice {
-        private GptMessageDto message;
-
-        public GptMessageDto getMessage() {
-            return message;
-        }
-
-        public void setMessage(GptMessageDto message) {
-            this.message = message;
-        }
-    }
+    private String summary;
+    private String topic;
+    private List<String> keywords;
 }

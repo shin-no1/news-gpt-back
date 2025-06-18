@@ -8,7 +8,5 @@ spring:
     import: optional:dotenv:.env
 
 openai:
-  api-key: ${OPENAI_API_KEY}
-  model: gpt-3.5-turbo
-  max-tokens: 300
+  max-tokens: 400
   temperature: 0.3
