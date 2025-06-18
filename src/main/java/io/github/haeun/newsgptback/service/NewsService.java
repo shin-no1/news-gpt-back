@@ -8,17 +8,21 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class NewsService {
-    private final JsoupNewsParser parser;
+    private final JsoupNewsParser jsoupNewsParser;
     private final GptClient gptClient;
 
-    public NewsService(JsoupNewsParser parser, GptClient gptClient) {
-        this.parser = parser;
+    public NewsService(JsoupNewsParser jsoupNewsParser, GptClient gptClient) {
+        this.jsoupNewsParser = jsoupNewsParser;
         this.gptClient = gptClient;
     }
 
-    public NewsResponse summarizeUrl(String url) {
-        NewsResponse newsResponse = parser.parse(url);
+    public NewsResponse getNewsResponse(String url) {
+        NewsResponse newsResponse = jsoupNewsParser.parse(url);
+        if (newsResponse == null) return null;
+
         GptResponse gptResponse = gptClient.summarize(newsResponse.getSummary());
+        if (gptResponse == null) return null;
+
         return new NewsResponse(newsResponse.getTitle(), gptResponse.getSummary(), gptResponse.getTopic(), gptResponse.getKeywords(), url);
     }
 }

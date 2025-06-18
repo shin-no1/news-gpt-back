@@ -19,6 +19,8 @@ public class NewsController {
 
     @PostMapping("/analyze-url")
     public NewsResponse analyzeUrl(@RequestBody NewsRequest request) {
-        return newsService.summarizeUrl(request.getUrl());
+        NewsResponse newsResponse = newsService.getNewsResponse(request.getUrl());
+        if (newsResponse == null) throw new RuntimeException("process error!");
+        return newsResponse;
     }
 }

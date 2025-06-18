@@ -19,13 +19,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class GptClient {
     private final String API_KEY;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    public GptClient() {
+    public GptClient(ObjectMapper objectMapper) {
         Dotenv dotenv = Dotenv.load();
         this.API_KEY = dotenv.get("OPENAI_API_KEY");
+        this.objectMapper = objectMapper;
     }
 
     @Value("${openai.max-tokens}")

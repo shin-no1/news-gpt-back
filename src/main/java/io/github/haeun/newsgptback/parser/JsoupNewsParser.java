@@ -1,12 +1,14 @@
 package io.github.haeun.newsgptback.parser;
 
 import io.github.haeun.newsgptback.dto.NewsResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 public class JsoupNewsParser {
     public NewsResponse parse(String url) {
@@ -20,7 +22,8 @@ public class JsoupNewsParser {
             String content = doc.select("#dic_area").text();
             return new NewsResponse(title, content);
         } catch (IOException e) {
-            throw new RuntimeException("뉴스 파싱 실패", e);
+            log.error("[Error]", e);
         }
+        return null;
     }
 }
