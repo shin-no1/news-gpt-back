@@ -5,6 +5,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import io.github.haeun.newsgptback.dto.GptMessageDto;
 import io.github.haeun.newsgptback.dto.GptRequestDto;
 import io.github.haeun.newsgptback.dto.GptResponseDto;
+import io.github.haeun.newsgptback.loader.PromptLoader;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +38,14 @@ public class GptClient {
     private double temperature;
 
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
+    String systemPrompt = PromptLoader.loadPrompt("summary");
 
     public String summarize(String articleText){
         try {
             OkHttpClient client = new OkHttpClient();
 
             List<GptMessageDto> messages = List.of(
-                    new GptMessageDto("system", "뉴스 기사를 간단하고 핵심적으로 요약해줘."),
+                    new GptMessageDto("system", systemPrompt),
                     new GptMessageDto("user", articleText)
             );
 
