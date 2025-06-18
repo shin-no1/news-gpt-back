@@ -35,6 +35,9 @@ public class JsoupNewsParser {
         if (originalUrl.contains("/article/print/")) {
             return originalUrl;
         }
+        if (originalUrl.contains("/hotissue/article/")) {
+            return originalUrl.replaceFirst("/hotissue/article/", "/article/print/");
+        }
         return originalUrl.replaceFirst("/article/", "/article/print/");
     }
 }
