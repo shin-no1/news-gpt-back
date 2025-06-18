@@ -11,59 +11,57 @@ import io.github.cdimascio.dotenv.Dotenv;
 import io.github.haeun.newsgptback.dto.GptResponse;
 import io.github.haeun.newsgptback.loader.PromptLoader;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class GptClient {
-    private final String API_KEY;
     private final ObjectMapper objectMapper;
+    private final OpenAIClient openAIClient;
+    private final String systemPrompt;
+    private final int maxTokens;
+    private final double temperature;
 
-    public GptClient(ObjectMapper objectMapper) {
-        Dotenv dotenv = Dotenv.load();
-        this.API_KEY = dotenv.get("OPENAI_API_KEY");
+    public GptClient(ObjectMapper objectMapper,
+                     @Value("${openai.max-tokens}") int maxTokens,
+                     @Value("${openai.temperature}") double temperature) {
         this.objectMapper = objectMapper;
+        this.systemPrompt = PromptLoader.loadPrompt("summary");
+        this.maxTokens = maxTokens;
+        this.temperature = temperature;
+        Dotenv dotenv = Dotenv.load();
+        String API_KEY = dotenv.get("OPENAI_API_KEY");
+        this.openAIClient = OpenAIOkHttpClient.builder()
+                .apiKey(API_KEY)
+                .build();
     }
 
-    @Value("${openai.max-tokens}")
-    private int maxTokens;
-
-    @Value("${openai.temperature}")
-    private double temperature;
-
-    String systemPrompt = PromptLoader.loadPrompt("summary");
-
-    public GptResponse summarize(String articleText){
+    public GptResponse summarize(String articleText) {
         try {
             long startTime = System.currentTimeMillis();
 
-            OpenAIClient client = OpenAIOkHttpClient.builder()
-                    .apiKey(API_KEY)
-                    .build();
-
             ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-                    .addUserMessage("Summarize the following news article using the format defined in the system prompt: \n" + articleText)
                     .addSystemMessage(systemPrompt)
+                    .addUserMessage("Summarize the following news article using the format defined in the system prompt:\n" + articleText)
                     .model(ChatModel.GPT_3_5_TURBO)
                     .temperature(temperature)
                     .maxCompletionTokens(maxTokens)
                     .build();
 
-            ChatCompletion chatCompletion = client.chat().completions().create(params);
+            ChatCompletion chatCompletion = openAIClient.chat().completions().create(params);
 
             CompletionUsage completionUsage = chatCompletion.usage().get();
 
             long endTime = System.currentTimeMillis();
-            log.info("[CompletionUsage] {} ms, prompt_tokens: {}, completion_tokens: {}, total_tokens: {}", endTime - startTime, completionUsage.promptTokens(), completionUsage.completionTokens(), completionUsage.totalTokens());
+            log.info("[CompletionUsage] {}s, prompt_tokens: {}, completion_tokens: {}, total_tokens: {}", (endTime - startTime) / 1000.0, completionUsage.promptTokens(), completionUsage.completionTokens(), completionUsage.totalTokens());
 
             String json = chatCompletion.choices().get(0).message().content().get();
             return objectMapper.readValue(json, GptResponse.class);
 
         } catch (Exception e) {
             log.error("[Error]", e);
+            return null;
         }
-        return null;
     }
 }
