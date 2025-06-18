@@ -17,7 +17,7 @@ public class JsoupNewsParser {
                 throw new RuntimeException("네이버 뉴스가 아닙니다.");
             }
 
-            Document doc = Jsoup.connect(url).get();
+            Document doc = Jsoup.connect(toPrintUrl(url)).get();
             String title = doc.title();
             String content = doc.select("#dic_area").text();
             return new NewsResponse(title, content);
@@ -25,5 +25,12 @@ public class JsoupNewsParser {
             log.error("[Error]", e);
         }
         return null;
+    }
+
+    private String toPrintUrl(String originalUrl) {
+        if (originalUrl.contains("/article/print/")) {
+            return originalUrl;
+        }
+        return originalUrl.replaceFirst("/article/", "/article/print/");
     }
 }
