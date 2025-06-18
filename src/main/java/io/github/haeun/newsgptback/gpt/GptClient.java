@@ -37,6 +37,8 @@ public class GptClient {
 
     public GptResponse summarize(String articleText){
         try {
+            long startTime = System.currentTimeMillis();
+
             OpenAIClient client = OpenAIOkHttpClient.builder()
                     .apiKey(API_KEY)
                     .build();
@@ -52,7 +54,9 @@ public class GptClient {
             ChatCompletion chatCompletion = client.chat().completions().create(params);
 
             CompletionUsage completionUsage = chatCompletion.usage().get();
-            log.info("[CompletionUsage] prompt_tokens: {}, completion_tokens: {}, total_tokens: {}", completionUsage.promptTokens(), completionUsage.completionTokens(), completionUsage.totalTokens());
+
+            long endTime = System.currentTimeMillis();
+            log.info("[CompletionUsage] {} ms, prompt_tokens: {}, completion_tokens: {}, total_tokens: {}", endTime - startTime, completionUsage.promptTokens(), completionUsage.completionTokens(), completionUsage.totalTokens());
 
             String json = chatCompletion.choices().get(0).message().content().get();
             return objectMapper.readValue(json, GptResponse.class);
