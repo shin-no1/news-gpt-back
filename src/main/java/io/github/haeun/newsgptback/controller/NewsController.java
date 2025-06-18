@@ -1,7 +1,7 @@
 package io.github.haeun.newsgptback.controller;
 
-import io.github.haeun.newsgptback.dto.NewsRequestDto;
-import io.github.haeun.newsgptback.dto.NewsResponseDto;
+import io.github.haeun.newsgptback.dto.NewsRequest;
+import io.github.haeun.newsgptback.dto.NewsResponse;
 import io.github.haeun.newsgptback.service.NewsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +18,7 @@ public class NewsController {
     }
 
     @PostMapping("/analyze-url")
-    public NewsResponseDto analyzeUrl(@RequestBody NewsRequestDto request) {
+    public NewsResponse analyzeUrl(@RequestBody NewsRequest request) {
         return newsService.summarizeUrl(request.getUrl());
     }
 }

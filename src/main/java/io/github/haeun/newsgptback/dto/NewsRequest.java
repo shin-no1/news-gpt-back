@@ -5,6 +5,6 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class NewsRequestDto {
+public class NewsRequest {
     private String url;
 }

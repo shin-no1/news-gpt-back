@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class GptResponseDto {
+public class GptResponse {
     private String summary;
     private String topic;
     private List<String> keywords;

@@ -6,11 +6,9 @@ import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.ChatModel;
 import com.openai.models.chat.completions.ChatCompletion;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
-import com.openai.models.chat.completions.StructuredChatCompletion;
-import com.openai.models.chat.completions.StructuredChatCompletionCreateParams;
 import com.openai.models.completions.CompletionUsage;
 import io.github.cdimascio.dotenv.Dotenv;
-import io.github.haeun.newsgptback.dto.GptResponseDto;
+import io.github.haeun.newsgptback.dto.GptResponse;
 import io.github.haeun.newsgptback.loader.PromptLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +36,7 @@ public class GptClient {
 
     String systemPrompt = PromptLoader.loadPrompt("summary");
 
-    public GptResponseDto summarize(String articleText){
+    public GptResponse summarize(String articleText){
         try {
             OpenAIClient client = OpenAIOkHttpClient.builder()
                     .apiKey(API_KEY)
@@ -58,7 +56,7 @@ public class GptClient {
             log.info("[CompletionUsage] prompt_tokens: {}, completion_tokens: {}, total_tokens: {}", completionUsage.promptTokens(), completionUsage.completionTokens(), completionUsage.totalTokens());
 
             String json = chatCompletion.choices().get(0).message().content().get();
-            return objectMapper.readValue(json, GptResponseDto.class);
+            return objectMapper.readValue(json, GptResponse.class);
 
         } catch (Exception e) {
             log.error("[Error]", e);
