@@ -11,6 +11,12 @@ import java.io.IOException;
 @Slf4j
 @Component
 public class JsoupNewsParser {
+    /**
+     * 뉴스 기사 HTML을 Jsoup으로 파싱하여 본문 텍스트를 추출
+     *
+     * @param url 크롤링할 기사 URL
+     * @return 추출된 기사 본문 텍스트
+     */
     public NewsResponse parse(String url) {
         try {
             if (!url.startsWith("https://n.news.naver.com/")) throw new RuntimeException("네이버 뉴스가 아닙니다.");
