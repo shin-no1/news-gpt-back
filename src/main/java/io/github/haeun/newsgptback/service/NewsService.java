@@ -16,6 +16,12 @@ public class NewsService {
         this.gptClient = gptClient;
     }
 
+    /**
+     * 뉴스 기사 URL을 입력받아, 기사 내용을 크롤링하고 GPT를 통해 요약 결과를 생성
+     *
+     * @param url 뉴스 기사 원문 URL
+     * @return 요약된 뉴스 응답 객체
+     */
     public NewsResponse getNewsResponse(String url) {
         NewsResponse newsResponse = jsoupNewsParser.parse(url);
         if (newsResponse == null) return null;
