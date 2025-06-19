@@ -22,14 +22,17 @@ public class GptClient {
     private final String systemPrompt;
     private final int maxTokens;
     private final double temperature;
+    private final int promptVersion;
 
     public GptClient(ObjectMapper objectMapper,
                      @Value("${openai.max-tokens}") int maxTokens,
-                     @Value("${openai.temperature}") double temperature) {
+                     @Value("${openai.temperature}") double temperature,
+                     @Value("${openai.prompt-version}") int promptVersion) {
         this.objectMapper = objectMapper;
-        this.systemPrompt = PromptLoader.loadPrompt("summary");
         this.maxTokens = maxTokens;
         this.temperature = temperature;
+        this.promptVersion = promptVersion;
+        this.systemPrompt = PromptLoader.loadPrompt("summary-v" + this.promptVersion);
         Dotenv dotenv = Dotenv.load();
         String API_KEY = dotenv.get("OPENAI_API_KEY");
         this.openAIClient = OpenAIOkHttpClient.builder()

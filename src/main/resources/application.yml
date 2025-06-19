@@ -10,3 +10,4 @@ spring:
 openai:
   max-tokens: 400
   temperature: 0.3
+  prompt-version: 1
