@@ -6,6 +6,13 @@ spring:
     name: news-gpt-back
   config:
     import: optional:dotenv:.env
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
   datasource:
     url: jdbc:mariadb://localhost:3306/news_gpt
     username: ENC(lBPAGZTtXv7Eov0O6BMY9w==)
