@@ -135,6 +135,9 @@
                         <version>${spring-restdocs.version}</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+                    <outputDirectory>${project.build.outputDirectory}/static/docs</outputDirectory>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

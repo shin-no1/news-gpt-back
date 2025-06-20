@@ -1,0 +1,11 @@
+= 뉴스 요약 API 문서
+:toc: left
+:source-highlighter: highlightjs
+:snippets: {snippets}
+
+== 뉴스 요약 요청
+
+include::{snippets}/analyze-url/http-request.adoc[]
+include::{snippets}/analyze-url/http-response.adoc[]
+include::{snippets}/analyze-url/request-fields.adoc[]
+include::{snippets}/analyze-url/response-fields.adoc[]
