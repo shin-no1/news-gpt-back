@@ -6,6 +6,11 @@ spring:
     name: news-gpt-back
   config:
     import: optional:dotenv:.env
+  datasource:
+    url: jdbc:mariadb://localhost:3306/news_gpt
+    username: ENC(lBPAGZTtXv7Eov0O6BMY9w==)
+    password: ENC(lBPAGZTtXv7Eov0O6BMY9w==)
+    driver-class-name: org.mariadb.jdbc.Driver
 
 openai:
   max-tokens: 400
