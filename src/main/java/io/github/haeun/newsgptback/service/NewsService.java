@@ -1,6 +1,7 @@
 package io.github.haeun.newsgptback.service;
 
 import io.github.haeun.newsgptback.dto.GptResponse;
+import io.github.haeun.newsgptback.record.NewsInfo;
 import io.github.haeun.newsgptback.dto.NewsResponse;
 import io.github.haeun.newsgptback.gpt.GptClient;
 import io.github.haeun.newsgptback.parser.JsoupNewsParser;
@@ -23,12 +24,12 @@ public class NewsService {
      * @return 요약된 뉴스 응답 객체
      */
     public NewsResponse getNewsResponse(String url) {
-        NewsResponse newsResponse = jsoupNewsParser.parse(url);
-        if (newsResponse == null) return null;
+        NewsInfo newsInfo = jsoupNewsParser.parse(url);
+        if (newsInfo == null) return null;
 
-        GptResponse gptResponse = gptClient.summarize(newsResponse.getSummary());
+        GptResponse gptResponse = gptClient.summarize(newsInfo);
         if (gptResponse == null) return null;
 
-        return new NewsResponse(newsResponse.getTitle(), gptResponse.getSummary(), gptResponse.getTopic(), gptResponse.getKeywords(), url);
+        return new NewsResponse(newsInfo.title(), gptResponse.getSummary(), gptResponse.getTopic(), gptResponse.getKeywords(), url);
     }
 }

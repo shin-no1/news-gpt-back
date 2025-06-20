@@ -9,6 +9,7 @@ import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.completions.CompletionUsage;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.haeun.newsgptback.dto.GptResponse;
+import io.github.haeun.newsgptback.record.NewsInfo;
 import io.github.haeun.newsgptback.loader.PromptLoader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,13 +38,13 @@ public class GptClient {
                 .build();
     }
 
-    public GptResponse summarize(String articleText) {
+    public GptResponse summarize(NewsInfo newsInfo) {
         try {
             long startTime = System.currentTimeMillis();
 
             ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
                     .addSystemMessage(systemPrompt)
-                    .addUserMessage("Summarize the following news article using the format defined in the system prompt:\n" + articleText)
+                    .addUserMessage("Summarize the following news article using the format defined in the system prompt:\n" + newsInfo.content())
                     .model(ChatModel.GPT_3_5_TURBO)
                     .temperature(temperature)
                     .maxCompletionTokens(maxTokens)

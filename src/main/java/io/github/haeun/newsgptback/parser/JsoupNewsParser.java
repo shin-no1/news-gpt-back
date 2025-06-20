@@ -1,6 +1,6 @@
 package io.github.haeun.newsgptback.parser;
 
-import io.github.haeun.newsgptback.dto.NewsResponse;
+import io.github.haeun.newsgptback.record.NewsInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,14 +17,14 @@ public class JsoupNewsParser {
      * @param url 크롤링할 기사 URL
      * @return 추출된 기사 본문 텍스트
      */
-    public NewsResponse parse(String url) {
+    public NewsInfo parse(String url) {
         try {
             if (!url.startsWith("https://n.news.naver.com/")) throw new RuntimeException("네이버 뉴스가 아닙니다.");
 
             Document doc = Jsoup.connect(toPrintUrl(url)).get();
             String title = doc.select("#title_area").text();
             String content = doc.select("#dic_area").text();
-            return new NewsResponse(title, content);
+            return new NewsInfo(title, content);
         } catch (IOException e) {
             log.error("[Error]", e);
         }
