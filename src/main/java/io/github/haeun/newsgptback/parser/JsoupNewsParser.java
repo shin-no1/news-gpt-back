@@ -24,7 +24,7 @@ public class JsoupNewsParser {
             Document doc = Jsoup.connect(toPrintUrl(url)).get();
             String title = doc.select("#title_area").text();
             String content = doc.select("#dic_area").text();
-            return new NewsInfo(title, content);
+            return new NewsInfo(title, content, url);
         } catch (IOException e) {
             log.error("[Error]", e);
         }

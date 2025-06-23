@@ -9,8 +9,8 @@ import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.completions.CompletionUsage;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.haeun.newsgptback.dto.GptResponse;
-import io.github.haeun.newsgptback.record.NewsInfo;
 import io.github.haeun.newsgptback.loader.PromptLoader;
+import io.github.haeun.newsgptback.record.NewsInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,12 +23,12 @@ public class GptClient {
     private final String systemPrompt;
     private final int maxTokens;
     private final double temperature;
-    public final int promptVersion;
+    public final String promptVersion;
 
     public GptClient(ObjectMapper objectMapper,
                      @Value("${openai.max-tokens}") int maxTokens,
                      @Value("${openai.temperature}") double temperature,
-                     @Value("${openai.prompt-version}") int promptVersion) {
+                     @Value("${openai.prompt-version}") String promptVersion) {
         this.objectMapper = objectMapper;
         this.maxTokens = maxTokens;
         this.temperature = temperature;
@@ -68,4 +68,6 @@ public class GptClient {
             return null;
         }
     }
+
+
 }
