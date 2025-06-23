@@ -2,9 +2,9 @@ package io.github.haeun.newsgptback.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.haeun.newsgptback.config.TestMockConfig;
-import io.github.haeun.newsgptback.dto.NewsRequest;
-import io.github.haeun.newsgptback.dto.NewsResponse;
-import io.github.haeun.newsgptback.service.NewsService;
+import io.github.haeun.newsgptback.news.dto.NewsRequest;
+import io.github.haeun.newsgptback.news.dto.NewsResponse;
+import io.github.haeun.newsgptback.news.service.NewsService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
