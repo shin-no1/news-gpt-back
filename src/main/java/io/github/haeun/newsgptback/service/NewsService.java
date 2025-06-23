@@ -3,10 +3,13 @@ package io.github.haeun.newsgptback.service;
 import io.github.haeun.newsgptback.domain.Site.Site;
 import io.github.haeun.newsgptback.domain.newsSummary.NewsSummary;
 import io.github.haeun.newsgptback.domain.newsSummary.NewsSummaryRepository;
+import io.github.haeun.newsgptback.domain.newsSummary.SummaryId;
 import io.github.haeun.newsgptback.domain.newsSummaryHistory.NewsSummaryHistory;
 import io.github.haeun.newsgptback.domain.newsSummaryHistory.NewsSummaryHistoryRepository;
+import io.github.haeun.newsgptback.domain.projection.NewsSummaryMetaProjection;
 import io.github.haeun.newsgptback.dto.GptResponse;
 import io.github.haeun.newsgptback.dto.NewsResponse;
+import io.github.haeun.newsgptback.enums.HistorySource;
 import io.github.haeun.newsgptback.gpt.GptClient;
 import io.github.haeun.newsgptback.parser.JsoupNewsParser;
 import io.github.haeun.newsgptback.record.NewsInfo;
@@ -42,7 +45,6 @@ public class NewsService {
         if (summaryId == null) {
             gptResponse = gptClient.summarize(newsInfo);
             if (gptResponse == null) return null;
-            // TODO: save newsSummary
         } else {
             NewsSummaryHistory newsSummaryHistory = newsSummaryHistoryRepository.findById(summaryId).get();
             gptResponse = new GptResponse();
@@ -53,34 +55,35 @@ public class NewsService {
 
         NewsResponse newsResponse = new NewsResponse(newsInfo.title(), gptResponse.getSummary(), gptResponse.getTopic(), gptResponse.getKeywords(), url);
         long endTime = System.currentTimeMillis();
-        saveLog(newsResponse, Math.round(endTime - startTime));
+        saveLog(newsResponse, Math.round(endTime - startTime), summaryId == null);
         return newsResponse;
     }
 
     private Long getSummaryId(NewsInfo newsInfo) {
         Site site = new Site();
         site.setId(1L);
-        Optional<NewsSummary> newsSummaryOptional = newsSummaryRepository.findByIdSiteIdAndIdUrlNum(site.getId(), UriUtils.getUrlNum(site, newsInfo.url()));
-        if (ObjectUtils.isEmpty(newsSummaryOptional)) {
+        Optional<NewsSummaryMetaProjection> newsSummaryOptional = newsSummaryRepository.findSummaryIdById(site.getId(), UriUtils.getUrlNum(site, newsInfo.url()));
+        if (newsSummaryOptional.isEmpty()) {
             return null;
         }
-        NewsSummary newsSummary = newsSummaryOptional.get();
+        NewsSummaryMetaProjection newsSummary = newsSummaryOptional.get();
         if (newsSummary.getPromptVersion().equals(gptClient.promptVersion)) {
-            return newsSummary.getSummary().getId();
+            return newsSummary.getSummaryId();
         }
         return null;
     }
 
 
-    private void saveLog(NewsResponse newsResponse, int responseTimeMs) {
+    private void saveLog(NewsResponse newsResponse, int responseTimeMs, boolean isNew) {
         // 현재 site_id = 0, status = SUCCESS 고정
         NewsSummaryHistory history = new NewsSummaryHistory();
         Site site = new Site();
         site.setId(1L);
+        String urlNum = UriUtils.getUrlNum(site, newsResponse.getUrl());
 
         history.setSite(site);
         history.setTitle(newsResponse.getTitle());
-        history.setUrlNum(UriUtils.getUrlNum(site, newsResponse.getUrl()));
+        history.setUrlNum(urlNum);
         history.setUrl(newsResponse.getUrl());
         history.setPromptVersion(String.valueOf(gptClient.promptVersion));
         history.setTitle(newsResponse.getTitle());
@@ -88,8 +91,27 @@ public class NewsService {
         history.setTopic(newsResponse.getTopic());
         history.setKeywords(newsResponse.getKeywords());
         history.setResponseTimeMs(responseTimeMs);
+        history.setSource(isNew ? HistorySource.NEW : HistorySource.CACHE);
 
         newsSummaryHistoryRepository.save(history);
+
+        if (isNew) {
+            SummaryId summaryId = new SummaryId(site.getId(), urlNum);
+            Optional<NewsSummary> optional = newsSummaryRepository.findById(summaryId);
+            if (optional.isPresent()) {
+                NewsSummary existing = optional.get();
+                existing.setPromptVersion(gptClient.promptVersion);
+                existing.setSummary(history);
+                newsSummaryRepository.save(existing); // UPDATE
+            } else {
+                NewsSummary newsSummary = new NewsSummary();
+                newsSummary.setId(summaryId);
+                newsSummary.setSite(site);
+                newsSummary.setSummary(history);
+                newsSummary.setPromptVersion(gptClient.promptVersion);
+                newsSummaryRepository.save(newsSummary); // INSERT
+            }
+        }
     }
 
 
