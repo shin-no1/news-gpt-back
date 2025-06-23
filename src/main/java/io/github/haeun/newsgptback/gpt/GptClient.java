@@ -23,7 +23,7 @@ public class GptClient {
     private final String systemPrompt;
     private final int maxTokens;
     private final double temperature;
-    private final int promptVersion;
+    public final int promptVersion;
 
     public GptClient(ObjectMapper objectMapper,
                      @Value("${openai.max-tokens}") int maxTokens,
