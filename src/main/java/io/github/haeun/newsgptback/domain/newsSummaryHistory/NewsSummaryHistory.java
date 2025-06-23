@@ -1,7 +1,8 @@
 package io.github.haeun.newsgptback.domain.newsSummaryHistory;
 
-import io.github.haeun.newsgptback.domain.Site.Site;
 import io.github.haeun.newsgptback.converter.StringListJsonConverter;
+import io.github.haeun.newsgptback.domain.Site.Site;
+import io.github.haeun.newsgptback.enums.HistorySource;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,6 +51,9 @@ public class NewsSummaryHistory {
 
     @Column(name = "response_time_ms")
     private Integer responseTimeMs;
+
+    @Enumerated(EnumType.STRING)
+    private HistorySource source = HistorySource.NEW;
 
     @Enumerated(EnumType.STRING)
     private Status status = Status.SUCCESS;
