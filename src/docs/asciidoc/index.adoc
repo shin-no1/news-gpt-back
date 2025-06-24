@@ -9,3 +9,6 @@ include::{snippets}/analyze-url/http-request.adoc[]
 include::{snippets}/analyze-url/http-response.adoc[]
 include::{snippets}/analyze-url/request-fields.adoc[]
 include::{snippets}/analyze-url/response-fields.adoc[]
+
+== Error code
+include::{snippets}/error-codes/generated-error-codes.adoc[]
