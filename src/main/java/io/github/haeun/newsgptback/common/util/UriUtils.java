@@ -13,4 +13,8 @@ public class UriUtils {
         }
         return null;
     }
+
+    public static boolean checkUrl(String url) {
+        return url.startsWith("https://n.news.naver.com/");
+    }
 }

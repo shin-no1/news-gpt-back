@@ -6,8 +6,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-
 @Slf4j
 @Component
 public class JsoupNewsParser {
@@ -19,13 +17,11 @@ public class JsoupNewsParser {
      */
     public NewsInfo parse(String url) {
         try {
-            if (!url.startsWith("https://n.news.naver.com/")) throw new RuntimeException("네이버 뉴스가 아닙니다.");
-
             Document doc = Jsoup.connect(toPrintUrl(url)).get();
             String title = doc.select("#title_area").text();
             String content = doc.select("#dic_area").text();
             return new NewsInfo(title, content, url);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("[Error]", e);
         }
         return null;

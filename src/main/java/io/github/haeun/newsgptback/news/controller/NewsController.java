@@ -1,5 +1,7 @@
 package io.github.haeun.newsgptback.news.controller;
 
+import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.news.dto.NewsRequest;
 import io.github.haeun.newsgptback.news.dto.NewsResponse;
 import io.github.haeun.newsgptback.news.service.NewsService;
@@ -10,25 +12,29 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api")
 @Tag(name = "뉴스 요약", description = "뉴스 기사 URL을 기반으로 GPT 요약을 수행하는 API")
 public class NewsController {
     private final NewsService newsService;
-
-    public NewsController(NewsService newsService) {
-        this.newsService = newsService;
-    }
+    private final RateLimiter rateLimiter;
 
     /**
      * 뉴스 기사 URL을 받아 GPT 기반 요약 결과를 반환하는 API
      *
-     * @param request 요약할 뉴스 기사 URL
+     * @param newsRequest 요약할 뉴스 기사 URL
      * @return 분석된 뉴스 결과 (제목, 요약, 주제, 키워드)
      */
     @Operation(
@@ -38,9 +44,10 @@ public class NewsController {
     @Parameters({@Parameter(name = "url", description = "URL", example = "https://n.news.naver.com/article/015/0005146248")})
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = NewsResponse.class)))
     @PostMapping("/analyze-url")
-    public NewsResponse analyzeUrl(@RequestBody NewsRequest request) {
-        NewsResponse newsResponse = newsService.getNewsResponse(request.getUrl());
-        if (newsResponse == null) throw new RuntimeException("process error!");
-        return newsResponse;
+    public ResponseEntity<?> analyzeUrl(@RequestBody NewsRequest newsRequest, HttpServletRequest request) {
+        NewsResponse newsResponse = newsService.getNewsResponse(newsRequest.getUrl());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(newsResponse);
     }
 }
