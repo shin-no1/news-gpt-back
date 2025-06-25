@@ -51,7 +51,7 @@ public class NewsControllerRestDocsTest {
         );
 
         // when
-        Mockito.when(newsService.getNewsResponse(anyString())).thenReturn(mockResponse);
+        Mockito.when(newsService.getNewsResponse(anyString(), anyString())).thenReturn(mockResponse);
 
         // then: RestDocs 문서화
         mockMvc.perform(post("/api/analyze-url")

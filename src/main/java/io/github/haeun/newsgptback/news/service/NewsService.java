@@ -5,8 +5,10 @@ import io.github.haeun.newsgptback.common.enums.HistorySource;
 import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.common.parser.JsoupNewsParser;
 import io.github.haeun.newsgptback.common.util.UriUtils;
-import io.github.haeun.newsgptback.infrastructure.client.GptClient;
-import io.github.haeun.newsgptback.infrastructure.dto.GptResponse;
+import io.github.haeun.newsgptback.infrastructure.gpt.client.GptClient;
+import io.github.haeun.newsgptback.infrastructure.gpt.dto.GptResponse;
+import io.github.haeun.newsgptback.infrastructure.kafka.dto.RequestLogMessage;
+import io.github.haeun.newsgptback.infrastructure.kafka.producer.RequestLogProducer;
 import io.github.haeun.newsgptback.news.domain.newsSummary.NewsSummary;
 import io.github.haeun.newsgptback.news.domain.newsSummary.NewsSummaryRepository;
 import io.github.haeun.newsgptback.news.domain.newsSummary.SummaryId;
@@ -19,6 +21,7 @@ import io.github.haeun.newsgptback.news.model.NewsInfo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -28,6 +31,7 @@ public class NewsService {
     private final GptClient gptClient;
     private final NewsSummaryHistoryRepository newsSummaryHistoryRepository;
     private final NewsSummaryRepository newsSummaryRepository;
+    private final RequestLogProducer requestLogProducer;
 
     /**
      * 뉴스 기사 URL을 입력받아, 기사 내용을 크롤링하고 GPT를 통해 요약 결과를 생성
@@ -35,7 +39,7 @@ public class NewsService {
      * @param url 뉴스 기사 원문 URL
      * @return 요약된 뉴스 응답 객체
      */
-    public NewsResponse getNewsResponse(String url) {
+    public NewsResponse getNewsResponse(String url, String ip) {
         long startTime = System.currentTimeMillis();
         if (!UriUtils.checkUrl(url)) {
             throw new CustomException(ErrorCode.INVALID_INPUT, "지원되지 않는 URL이 입력되었습니다.");
@@ -64,6 +68,16 @@ public class NewsService {
         NewsResponse newsResponse = new NewsResponse(newsInfo.title(), gptResponse.getSummary(), gptResponse.getTopic(), gptResponse.getKeywords(), url);
         long endTime = System.currentTimeMillis();
         saveLog(newsResponse, Math.round(endTime - startTime), summaryId == null);
+
+        RequestLogMessage log = new RequestLogMessage(
+                null,
+                ip,
+                url,
+                true,
+                LocalDateTime.now()
+        );
+        requestLogProducer.sendLog(log);
+
         return newsResponse;
     }
 
