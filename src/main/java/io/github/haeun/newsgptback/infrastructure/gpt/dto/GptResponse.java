@@ -1,4 +1,4 @@
-package io.github.haeun.newsgptback.infrastructure.dto;
+package io.github.haeun.newsgptback.infrastructure.gpt.dto;
 
 import lombok.Data;
 

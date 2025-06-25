@@ -1,4 +1,4 @@
-package io.github.haeun.newsgptback.infrastructure.client;
+package io.github.haeun.newsgptback.infrastructure.gpt.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openai.client.OpenAIClient;
@@ -8,8 +8,8 @@ import com.openai.models.chat.completions.ChatCompletion;
 import com.openai.models.chat.completions.ChatCompletionCreateParams;
 import com.openai.models.completions.CompletionUsage;
 import io.github.cdimascio.dotenv.Dotenv;
-import io.github.haeun.newsgptback.infrastructure.dto.GptResponse;
-import io.github.haeun.newsgptback.infrastructure.loader.PromptLoader;
+import io.github.haeun.newsgptback.infrastructure.gpt.dto.GptResponse;
+import io.github.haeun.newsgptback.infrastructure.gpt.loader.PromptLoader;
 import io.github.haeun.newsgptback.news.model.NewsInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

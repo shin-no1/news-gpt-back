@@ -1,4 +1,4 @@
-package io.github.haeun.newsgptback.infrastructure.loader;
+package io.github.haeun.newsgptback.infrastructure.gpt.loader;
 
 import org.springframework.core.io.ClassPathResource;
 
