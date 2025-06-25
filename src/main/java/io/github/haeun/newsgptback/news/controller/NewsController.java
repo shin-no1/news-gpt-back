@@ -2,6 +2,7 @@ package io.github.haeun.newsgptback.news.controller;
 
 import io.github.haeun.newsgptback.common.enums.ErrorCode;
 import io.github.haeun.newsgptback.common.exception.CustomException;
+import io.github.haeun.newsgptback.common.util.RateLimiter;
 import io.github.haeun.newsgptback.news.dto.NewsRequest;
 import io.github.haeun.newsgptback.news.dto.NewsResponse;
 import io.github.haeun.newsgptback.news.service.NewsService;
@@ -45,6 +46,15 @@ public class NewsController {
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = NewsResponse.class)))
     @PostMapping("/analyze-url")
     public ResponseEntity<?> analyzeUrl(@RequestBody NewsRequest newsRequest, HttpServletRequest request) {
+        String ip = request.getRemoteAddr();
+        String key = "rate:" + ip + ":" + LocalDate.now();
+
+        int ANALYZE_LIMIT = 5, ANALYZE_TTL_SECONDS = 86400;
+        boolean allowed = rateLimiter.isAllowed(key, ANALYZE_LIMIT, ANALYZE_TTL_SECONDS);
+        if (!allowed) {
+            throw new CustomException(ErrorCode.RATE_LIMIT_EXCEEDED);
+        }
+
         NewsResponse newsResponse = newsService.getNewsResponse(newsRequest.getUrl());
         return ResponseEntity
                 .status(HttpStatus.OK)
