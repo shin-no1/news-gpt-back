@@ -48,17 +48,15 @@ public class NewsController {
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = NewsResponse.class)))
     @PostMapping("/analyze-url")
     public ResponseEntity<?> analyzeUrl(@RequestBody NewsRequest newsRequest, HttpServletRequest request) {
+        int ANALYZE_LIMIT = 5, ANALYZE_TTL_SECONDS = 86400;
         String ip = request.getRemoteAddr();
         String key = "rate:" + ip + ":" + LocalDate.now();
-
-        int ANALYZE_LIMIT = 5, ANALYZE_TTL_SECONDS = 86400;
-        boolean allowed = rateLimiter.isAllowed(key, ANALYZE_LIMIT, ANALYZE_TTL_SECONDS);
-        if (!allowed) {
+        long current = rateLimiter.getCurrentCount(key);
+        if (current >= ANALYZE_LIMIT) {
             throw new CustomException(ErrorCode.RATE_LIMIT_EXCEEDED);
         }
-
-        NewsResponse newsResponse = newsService.getNewsResponse(newsRequest.getUrl());
         NewsResponse newsResponse = newsService.getNewsResponse(newsRequest.getUrl(), ip);
+        rateLimiter.incrementWithTtlIfNeeded(key, ANALYZE_TTL_SECONDS);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(newsResponse);
