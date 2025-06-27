@@ -1,5 +1,6 @@
 package io.github.haeun.newsgptback.config;
 
+import io.github.haeun.newsgptback.news.service.AuthService;
 import io.github.haeun.newsgptback.news.service.NewsService;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -10,5 +11,9 @@ public class TestMockConfig {
     @Bean
     public NewsService newsService() {
         return Mockito.mock(NewsService.class);
+    }
+    @Bean
+    public AuthService authService() {
+        return Mockito.mock(AuthService.class);
     }
 }

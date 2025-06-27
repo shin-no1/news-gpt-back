@@ -3,6 +3,24 @@
 :source-highlighter: highlightjs
 :snippets: {snippets}
 
+== 회원 가입
+
+=== 코드 전송
+include::{snippets}/auth-send-code/http-request.adoc[]
+include::{snippets}/auth-send-code/http-response.adoc[]
+include::{snippets}/auth-send-code/request-fields.adoc[]
+
+=== 코드 확인
+include::{snippets}/auth-verify-code/http-request.adoc[]
+include::{snippets}/auth-verify-code/http-response.adoc[]
+include::{snippets}/auth-verify-code/request-fields.adoc[]
+
+=== 가입
+include::{snippets}/auth-signup/http-request.adoc[]
+include::{snippets}/auth-signup/http-response.adoc[]
+include::{snippets}/auth-signup/request-fields.adoc[]
+
+
 == 뉴스 요약 요청
 
 include::{snippets}/analyze-url/http-request.adoc[]
