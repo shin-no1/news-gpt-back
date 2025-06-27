@@ -39,6 +39,14 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: auth.newsgpt@gmail.com
+    password: ENC(EXSg08jUfBcwdIeOg0jjCvZST834mU6j9XPLaS6MOcg=)
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
 
 openai:
   max-tokens: 400
