@@ -36,6 +36,10 @@ public class AuthService {
             throw new CustomException(ErrorCode.EMAIL_DOMAIN_NOT_ALLOWED);
         }
 
+        if (userRepository.existsByEmail(email)) {
+            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
         String code = String.format("%06d", new Random().nextInt(1000000));
         redisTemplate.opsForValue().set("email_code:" + email, code, Duration.ofMinutes(5));
         emailService.sendCode(email, code);
