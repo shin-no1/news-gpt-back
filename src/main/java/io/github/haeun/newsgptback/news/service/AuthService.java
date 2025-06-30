@@ -1,24 +1,30 @@
 package io.github.haeun.newsgptback.news.service;
 
 import io.github.haeun.newsgptback.common.enums.EmailVerificationAction;
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
 import io.github.haeun.newsgptback.common.enums.EmailVerificationStatus;
-import io.github.haeun.newsgptback.common.enums.UserStatus;
+import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.enums.UserRole;
 import io.github.haeun.newsgptback.common.exception.CustomException;
+import io.github.haeun.newsgptback.common.util.JwtUtil;
 import io.github.haeun.newsgptback.news.domain.emailVerificationLog.EmailVerificationLog;
 import io.github.haeun.newsgptback.news.domain.emailVerificationLog.EmailVerificationLogRepository;
 import io.github.haeun.newsgptback.news.domain.user.User;
 import io.github.haeun.newsgptback.news.domain.user.UserRepository;
 import io.github.haeun.newsgptback.news.dto.EmailCodeVerifyRequest;
+import io.github.haeun.newsgptback.news.dto.LoginRequest;
+import io.github.haeun.newsgptback.news.dto.LoginResponse;
 import io.github.haeun.newsgptback.news.dto.SignupRequest;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +35,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final EmailVerificationLogRepository emailVerificationLogRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     /**
      * 이메일 인증 코드를 생성하여 사용자에게 전송
@@ -105,13 +112,13 @@ public class AuthService {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        if (userRepository.existsByNickname(signupRequest.getNickname())) {
+        if (userRepository.existsByUserId(signupRequest.getNickname())) {
             emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, ErrorCode.NICKNAME_ALREADY_EXISTS, request));
             throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
 
         String encodedPw = passwordEncoder.encode(signupRequest.getPassword());
-        User user = new User(signupRequest.getEmail(), signupRequest.getNickname(), encodedPw, UserStatus.ACTIVE);
+        User user = new User(signupRequest.getEmail(), signupRequest.getNickname(), encodedPw, true, UserRole.USER);
         userRepository.save(user);
 
         redisTemplate.delete("email_verified:" + signupRequest.getEmail());
@@ -148,6 +155,41 @@ public class AuthService {
                 errorCode.getMessage(),
                 request.getRemoteAddr(),
                 request.getHeader("User-Agent")
+        );
+    }
+
+    /**
+     * 사용자 로그인 요청을 인증하고 액세스 토큰과 리프레시 토큰을 생성한 후,
+     * 리프레시 토큰을 Redis에 7일간의 유효기간과 함께 저장
+     *
+     * @param request 사용자의 이메일과 비밀번호가 포함된 로그인 요청
+     * @return 인증된 사용자의 액세스 토큰, 리프레시 토큰, 닉네임, 역할이 포함된 LoginResponse
+     * @throws IllegalArgumentException 이메일이나 비밀번호가 올바르지 않은 경우 발생
+     * @throws IllegalStateException    이메일이 인증되지 않은 경우 발생
+     */
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByUserId(request.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+
+        if (!user.isEmailVerified()) {
+            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+
+        String accessToken = jwtUtil.generateAccessToken(user);
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+
+        String redisKey = "refresh:" + user.getId() + ":" + request.getDeviceId();
+        redisTemplate.opsForValue().set(redisKey, refreshToken, 7, TimeUnit.DAYS);
+
+        return new LoginResponse(
+                accessToken,
+                refreshToken,
+                user.getUserId(),
+                user.getRole().name()
         );
     }
 }
