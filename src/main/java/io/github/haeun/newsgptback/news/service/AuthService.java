@@ -192,4 +192,16 @@ public class AuthService {
                 user.getRole().name()
         );
     }
+
+    /**
+     * 사용자 로그아웃 처리
+     * Redis에 저장된 리프레시 토큰을 삭제하여 로그아웃 처리
+     *
+     * @param user     로그아웃할 사용자 정보
+     * @param deviceId 사용자의 기기 식별자
+     */
+    public void logout(User user, String deviceId) {
+        String key = "refresh:" + user.getId() + ":" + deviceId;
+        redisTemplate.delete(key);
+    }
 }

@@ -12,8 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
-
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
@@ -49,4 +47,10 @@ public class AuthController {
                 .body(loginResponse);
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@AuthenticationPrincipal User user,
+                                         @RequestHeader("X-Device-Id") String deviceId) {
+        authService.logout(user, deviceId);
+        return ResponseEntity.ok("로그아웃 되었습니다.");
+    }
 }
