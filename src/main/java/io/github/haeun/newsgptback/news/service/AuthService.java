@@ -172,11 +172,11 @@ public class AuthService {
                 .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
 
         if (!user.isEmailVerified()) {
-            throw new IllegalStateException("이메일 인증이 완료되지 않았습니다.");
+            throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtUtil.generateAccessToken(user);

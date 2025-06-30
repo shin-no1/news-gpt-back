@@ -1,6 +1,8 @@
 package io.github.haeun.newsgptback.common.filter;
 
+import io.github.haeun.newsgptback.common.enums.ErrorCode;
 import io.github.haeun.newsgptback.common.enums.TokenStatus;
+import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.common.util.JwtUtil;
 import io.github.haeun.newsgptback.news.domain.user.User;
 import io.github.haeun.newsgptback.news.domain.user.UserRepository;
@@ -13,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -35,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = jwtUtil.parseClaims(token);
             Long userId = Long.parseLong(claims.getSubject());
             User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new UsernameNotFoundException("사용자 없음"));
+                    .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     user, null, user.getAuthorities()
             );
