@@ -4,11 +4,10 @@ import io.github.haeun.newsgptback.news.domain.user.User;
 
 public record UserInfoResponse(
         Long id,
-        String email,
-        String nickname,
+        String userId,
         String role
 ) {
     public UserInfoResponse(User user) {
-        this(user.getId(), user.getEmail(), user.getUserId(), user.getRole().name());
+        this(user.getId(), user.getUserId(), user.getRole().name());
     }
 }

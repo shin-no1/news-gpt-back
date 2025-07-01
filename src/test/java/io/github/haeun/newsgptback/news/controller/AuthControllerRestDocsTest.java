@@ -71,7 +71,7 @@ class AuthControllerTest {
 
     @Test
     void signup() throws Exception {
-        SignupRequest request = new SignupRequest("test@example.com", "password", "nickname");
+        SignupRequest request = new SignupRequest("test@example.com", "password", "userId");
         doNothing().when(authService).signup(any(), any());
 
         mockMvc.perform(post("/api/auth/signup")
@@ -82,7 +82,7 @@ class AuthControllerTest {
                         requestFields(
                                 fieldWithPath("email").description("사용자 이메일"),
                                 fieldWithPath("password").description("사용자 비밀번호"),
-                                fieldWithPath("nickname").description("사용자 닉네임")
+                                fieldWithPath("userId").description("사용자 닉네임")
                         )));
     }
 }
