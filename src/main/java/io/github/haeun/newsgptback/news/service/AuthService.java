@@ -18,7 +18,6 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -164,12 +163,11 @@ public class AuthService {
      *
      * @param request 사용자의 이메일과 비밀번호가 포함된 로그인 요청
      * @return 인증된 사용자의 액세스 토큰, 리프레시 토큰, 닉네임, 역할이 포함된 LoginResponse
-     * @throws IllegalArgumentException 이메일이나 비밀번호가 올바르지 않은 경우 발생
-     * @throws IllegalStateException    이메일이 인증되지 않은 경우 발생
+     * @throws CustomException 이메일이나 비밀번호가 올바르지 않은 경우, 이메일이 인증되지 않은 경우 발생
      */
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (!user.isEmailVerified()) {
             throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
@@ -203,5 +201,40 @@ public class AuthService {
     public void logout(User user, String deviceId) {
         String key = "refresh:" + user.getId() + ":" + deviceId;
         redisTemplate.delete(key);
+    }
+
+    /**
+     * 액세스 토큰과 리프레시 토큰을 재발급
+     * 기존 리프레시 토큰의 유효성을 검증하고, 새로운 토큰 쌍을 발급
+     *
+     * @param refreshToken 기존 리프레시 토큰
+     * @param deviceId     사용자의 기기 식별자
+     * @return 새로 발급된 액세스 토큰, 리프레시 토큰, 사용자 정보가 포함된 LoginResponse
+     * @throws CustomException 리프레시 토큰이 유효하지 않은 경우 발생, 사용자를 찾을 수 없는 경우 발생
+     */
+    public LoginResponse reissue(String refreshToken, String deviceId) {
+        Claims claims = jwtUtil.parseClaims(refreshToken);
+        Long userId = Long.parseLong(claims.getSubject());
+
+        String redisKey = "refresh:" + userId + ":" + deviceId;
+        String storedToken = redisTemplate.opsForValue().get(redisKey);
+
+        if (storedToken == null || !storedToken.equals(refreshToken)) {
+            throw new CustomException(ErrorCode.TOKEN_INVALID);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String newAccessToken = jwtUtil.generateAccessToken(user);
+        String newRefreshToken = jwtUtil.generateRefreshToken(user);
+
+        redisTemplate.opsForValue().set(redisKey, newRefreshToken, 7, TimeUnit.DAYS);
+
+        return new LoginResponse(
+                newAccessToken,
+                newRefreshToken,
+                user.getUserId(),
+                user.getRole().name()
+        );
     }
 }

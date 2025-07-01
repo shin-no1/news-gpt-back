@@ -39,7 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         LoginResponse loginResponse = authService.login(request);
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -52,5 +52,16 @@ public class AuthController {
                                          @RequestHeader("X-Device-Id") String deviceId) {
         authService.logout(user, deviceId);
         return ResponseEntity.ok("로그아웃 되었습니다.");
+    }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<LoginResponse> reissue(@RequestHeader("Authorization") String bearerToken,
+                                                 @RequestHeader("X-Device-Id") String deviceId) {
+        String refreshToken = bearerToken.replace("Bearer ", "");
+        LoginResponse response = authService.reissue(refreshToken, deviceId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(response);
     }
 }

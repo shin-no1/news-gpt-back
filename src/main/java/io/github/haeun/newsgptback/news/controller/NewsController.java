@@ -48,7 +48,7 @@ public class NewsController {
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = NewsResponse.class)))
     @PostMapping("/analyze-url")
     public ResponseEntity<?> analyzeUrl(@RequestBody NewsRequest newsRequest, HttpServletRequest request) {
-        int ANALYZE_LIMIT = 5, ANALYZE_TTL_SECONDS = 86400;
+        int ANALYZE_LIMIT = 100, ANALYZE_TTL_SECONDS = 86400;
         String ip = request.getRemoteAddr();
         String key = "rate:" + ip + ":" + LocalDate.now();
         long current = rateLimiter.getCurrentCount(key);
