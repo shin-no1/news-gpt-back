@@ -36,6 +36,10 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
+    private final String REDIS_KEY_LOGIN_FAIL = "login:fail:";
+    private final String REDIS_KEY_REFRESH = "refresh:";
+    private final String REDIS_KEY_EMAIL_VERIFIED = "email_verified:";
+
     /**
      * 이메일 인증 코드를 생성하여 사용자에게 전송
      * naver.com 또는 kakao.com 도메인의 이메일만 허용
@@ -87,7 +91,7 @@ public class AuthService {
         }
 
         redisTemplate.delete(key);
-        redisTemplate.opsForValue().set("email_verified:" + verifyRequest.getEmail(), "true", Duration.ofMinutes(10));
+        redisTemplate.opsForValue().set(REDIS_KEY_EMAIL_VERIFIED + verifyRequest.getEmail(), "true", Duration.ofMinutes(10));
         emailVerificationLogRepository.save(createSuccessLog(verifyRequest.getEmail(), EmailVerificationAction.SEND_CODE, request));
     }
 
@@ -101,7 +105,7 @@ public class AuthService {
      * @throws CustomException 이메일 미인증, 이메일 중복, 닉네임 중복 시 발생
      */
     public void signup(SignupRequest signupRequest, HttpServletRequest request) {
-        if (!"true".equals(redisTemplate.opsForValue().get("email_verified:" + signupRequest.getEmail()))) {
+        if (!"true".equals(redisTemplate.opsForValue().get(REDIS_KEY_EMAIL_VERIFIED + signupRequest.getEmail()))) {
             emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, ErrorCode.EMAIL_NOT_VERIFIED, request));
             throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
@@ -120,7 +124,7 @@ public class AuthService {
         User user = new User(signupRequest.getEmail(), signupRequest.getNickname(), encodedPw, true, UserRole.USER);
         userRepository.save(user);
 
-        redisTemplate.delete("email_verified:" + signupRequest.getEmail());
+        redisTemplate.delete(REDIS_KEY_EMAIL_VERIFIED + signupRequest.getEmail());
         emailVerificationLogRepository.save(createSuccessLog(signupRequest.getEmail(), EmailVerificationAction.SEND_CODE, request));
     }
 
@@ -166,6 +170,7 @@ public class AuthService {
      * @throws CustomException 이메일이나 비밀번호가 올바르지 않은 경우, 이메일이 인증되지 않은 경우 발생
      */
     public LoginResponse login(LoginRequest request) {
+        loginLockCheck(request.getUserId());
         User user = userRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
@@ -173,15 +178,19 @@ public class AuthService {
             throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
+        String loginLockKey = REDIS_KEY_LOGIN_FAIL + user.getUserId();
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            redisTemplate.opsForValue().increment(loginLockKey);
+            redisTemplate.expire(loginLockKey, 5, TimeUnit.MINUTES);
             throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtUtil.generateAccessToken(user);
         String refreshToken = jwtUtil.generateRefreshToken(user);
-
-        String redisKey = "refresh:" + user.getId() + ":" + request.getDeviceId();
+        String redisKey = REDIS_KEY_REFRESH + user.getId() + ":" + request.getDeviceId();
         redisTemplate.opsForValue().set(redisKey, refreshToken, 7, TimeUnit.DAYS);
+
+        redisTemplate.delete(loginLockKey);
 
         return new LoginResponse(
                 accessToken,
@@ -189,6 +198,18 @@ public class AuthService {
                 user.getUserId(),
                 user.getRole().name()
         );
+    }
+
+    private void loginLockCheck(String userId) {
+        int MAX_FAIL_COUNT = 5;
+        String key = REDIS_KEY_LOGIN_FAIL + userId;
+
+        String failCountStr = redisTemplate.opsForValue().get(key);
+        int failCount = failCountStr == null ? 0 : Integer.parseInt(failCountStr);
+
+        if (failCount >= MAX_FAIL_COUNT) {
+            throw new CustomException(ErrorCode.LOGIN_LOCKED);
+        }
     }
 
     /**
@@ -199,7 +220,7 @@ public class AuthService {
      * @param deviceId 사용자의 기기 식별자
      */
     public void logout(User user, String deviceId) {
-        String key = "refresh:" + user.getId() + ":" + deviceId;
+        String key = REDIS_KEY_REFRESH + user.getId() + ":" + deviceId;
         redisTemplate.delete(key);
     }
 
@@ -216,7 +237,7 @@ public class AuthService {
         Claims claims = jwtUtil.parseClaims(refreshToken);
         Long userId = Long.parseLong(claims.getSubject());
 
-        String redisKey = "refresh:" + userId + ":" + deviceId;
+        String redisKey = REDIS_KEY_REFRESH + userId + ":" + deviceId;
         String storedToken = redisTemplate.opsForValue().get(redisKey);
 
         if (storedToken == null || !storedToken.equals(refreshToken)) {

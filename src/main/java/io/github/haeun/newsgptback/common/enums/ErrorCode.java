@@ -24,7 +24,7 @@ public enum ErrorCode {
     // 인증 및 로그인
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 올바르지 않습니다."),
     USER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "존재하지 않는 사용자입니다."),
-    ACCOUNT_LOCKED(HttpStatus.UNAUTHORIZED, "계정이 잠겨 있습니다."),
+    LOGIN_LOCKED(HttpStatus.TOO_MANY_REQUESTS, "로그인 시도 횟수가 너무 많습니다. 잠시 후 다시 시도해주세요."),
     ACCOUNT_DISABLED(HttpStatus.UNAUTHORIZED, "비활성화된 계정입니다."),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "토큰이 만료되었습니다."),
     TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
