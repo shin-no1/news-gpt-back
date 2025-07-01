@@ -54,7 +54,7 @@ public class NewsControllerRestDocsTest {
         Mockito.when(newsService.getNewsResponse(anyString(), anyString())).thenReturn(mockResponse);
 
         // then: RestDocs 문서화
-        mockMvc.perform(post("/api/analyze-url")
+        mockMvc.perform(post("/api/news/analyze-url")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(request)))
                 .andDo(print())
@@ -63,7 +63,8 @@ public class NewsControllerRestDocsTest {
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         requestFields(
-                                fieldWithPath("url").description("뉴스 기사 URL")
+                                fieldWithPath("url").description("뉴스 기사 URL"),
+                                fieldWithPath("login").description("ACCESS 토큰 여부")
                         ),
                         responseFields(
                                 fieldWithPath("title").description("뉴스 제목"),
