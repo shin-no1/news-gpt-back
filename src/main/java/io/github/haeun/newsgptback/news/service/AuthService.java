@@ -1,16 +1,20 @@
 package io.github.haeun.newsgptback.news.service;
 
 import io.github.haeun.newsgptback.common.enums.EmailVerificationAction;
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
 import io.github.haeun.newsgptback.common.enums.EmailVerificationStatus;
-import io.github.haeun.newsgptback.common.enums.UserStatus;
+import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.enums.UserRole;
 import io.github.haeun.newsgptback.common.exception.CustomException;
+import io.github.haeun.newsgptback.common.util.JwtUtil;
 import io.github.haeun.newsgptback.news.domain.emailVerificationLog.EmailVerificationLog;
 import io.github.haeun.newsgptback.news.domain.emailVerificationLog.EmailVerificationLogRepository;
 import io.github.haeun.newsgptback.news.domain.user.User;
 import io.github.haeun.newsgptback.news.domain.user.UserRepository;
 import io.github.haeun.newsgptback.news.dto.EmailCodeVerifyRequest;
+import io.github.haeun.newsgptback.news.dto.LoginRequest;
+import io.github.haeun.newsgptback.news.dto.LoginResponse;
 import io.github.haeun.newsgptback.news.dto.SignupRequest;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +34,11 @@ public class AuthService {
     private final UserRepository userRepository;
     private final EmailVerificationLogRepository emailVerificationLogRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+
+    private final String REDIS_KEY_LOGIN_FAIL = "login:fail:";
+    private final String REDIS_KEY_REFRESH = "refresh:";
+    private final String REDIS_KEY_EMAIL_VERIFIED = "email_verified:";
 
     /**
      * 이메일 인증 코드를 생성하여 사용자에게 전송
@@ -81,7 +91,7 @@ public class AuthService {
         }
 
         redisTemplate.delete(key);
-        redisTemplate.opsForValue().set("email_verified:" + verifyRequest.getEmail(), "true", Duration.ofMinutes(10));
+        redisTemplate.opsForValue().set(REDIS_KEY_EMAIL_VERIFIED + verifyRequest.getEmail(), "true", Duration.ofMinutes(10));
         emailVerificationLogRepository.save(createSuccessLog(verifyRequest.getEmail(), EmailVerificationAction.SEND_CODE, request));
     }
 
@@ -95,7 +105,7 @@ public class AuthService {
      * @throws CustomException 이메일 미인증, 이메일 중복, 닉네임 중복 시 발생
      */
     public void signup(SignupRequest signupRequest, HttpServletRequest request) {
-        if (!"true".equals(redisTemplate.opsForValue().get("email_verified:" + signupRequest.getEmail()))) {
+        if (!"true".equals(redisTemplate.opsForValue().get(REDIS_KEY_EMAIL_VERIFIED + signupRequest.getEmail()))) {
             emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, ErrorCode.EMAIL_NOT_VERIFIED, request));
             throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
@@ -105,16 +115,16 @@ public class AuthService {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        if (userRepository.existsByNickname(signupRequest.getNickname())) {
+        if (userRepository.existsByUserId(signupRequest.getNickname())) {
             emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, ErrorCode.NICKNAME_ALREADY_EXISTS, request));
             throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
 
         String encodedPw = passwordEncoder.encode(signupRequest.getPassword());
-        User user = new User(signupRequest.getEmail(), signupRequest.getNickname(), encodedPw, UserStatus.ACTIVE);
+        User user = new User(signupRequest.getEmail(), signupRequest.getNickname(), encodedPw, true, UserRole.USER);
         userRepository.save(user);
 
-        redisTemplate.delete("email_verified:" + signupRequest.getEmail());
+        redisTemplate.delete(REDIS_KEY_EMAIL_VERIFIED + signupRequest.getEmail());
         emailVerificationLogRepository.save(createSuccessLog(signupRequest.getEmail(), EmailVerificationAction.SEND_CODE, request));
     }
 
@@ -148,6 +158,104 @@ public class AuthService {
                 errorCode.getMessage(),
                 request.getRemoteAddr(),
                 request.getHeader("User-Agent")
+        );
+    }
+
+    /**
+     * 사용자 로그인 요청을 인증하고 액세스 토큰과 리프레시 토큰을 생성한 후,
+     * 리프레시 토큰을 Redis에 7일간의 유효기간과 함께 저장
+     *
+     * @param request 사용자의 이메일과 비밀번호가 포함된 로그인 요청
+     * @return 인증된 사용자의 액세스 토큰, 리프레시 토큰, 닉네임, 역할이 포함된 LoginResponse
+     * @throws CustomException 이메일이나 비밀번호가 올바르지 않은 경우, 이메일이 인증되지 않은 경우 발생
+     */
+    public LoginResponse login(LoginRequest request) {
+        loginLockCheck(request.getUserId());
+        User user = userRepository.findByUserId(request.getUserId())
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        if (!user.isEmailVerified()) {
+            throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+
+        String loginLockKey = REDIS_KEY_LOGIN_FAIL + user.getUserId();
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            redisTemplate.opsForValue().increment(loginLockKey);
+            redisTemplate.expire(loginLockKey, 5, TimeUnit.MINUTES);
+            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
+        }
+
+        String accessToken = jwtUtil.generateAccessToken(user);
+        String refreshToken = jwtUtil.generateRefreshToken(user);
+        String redisKey = REDIS_KEY_REFRESH + user.getId() + ":" + request.getDeviceId();
+        redisTemplate.opsForValue().set(redisKey, refreshToken, 7, TimeUnit.DAYS);
+
+        redisTemplate.delete(loginLockKey);
+
+        return new LoginResponse(
+                accessToken,
+                refreshToken,
+                user.getUserId(),
+                user.getRole().name()
+        );
+    }
+
+    private void loginLockCheck(String userId) {
+        int MAX_FAIL_COUNT = 5;
+        String key = REDIS_KEY_LOGIN_FAIL + userId;
+
+        String failCountStr = redisTemplate.opsForValue().get(key);
+        int failCount = failCountStr == null ? 0 : Integer.parseInt(failCountStr);
+
+        if (failCount >= MAX_FAIL_COUNT) {
+            throw new CustomException(ErrorCode.LOGIN_LOCKED);
+        }
+    }
+
+    /**
+     * 사용자 로그아웃 처리
+     * Redis에 저장된 리프레시 토큰을 삭제하여 로그아웃 처리
+     *
+     * @param user     로그아웃할 사용자 정보
+     * @param deviceId 사용자의 기기 식별자
+     */
+    public void logout(User user, String deviceId) {
+        String key = REDIS_KEY_REFRESH + user.getId() + ":" + deviceId;
+        redisTemplate.delete(key);
+    }
+
+    /**
+     * 액세스 토큰과 리프레시 토큰을 재발급
+     * 기존 리프레시 토큰의 유효성을 검증하고, 새로운 토큰 쌍을 발급
+     *
+     * @param refreshToken 기존 리프레시 토큰
+     * @param deviceId     사용자의 기기 식별자
+     * @return 새로 발급된 액세스 토큰, 리프레시 토큰, 사용자 정보가 포함된 LoginResponse
+     * @throws CustomException 리프레시 토큰이 유효하지 않은 경우 발생, 사용자를 찾을 수 없는 경우 발생
+     */
+    public LoginResponse reissue(String refreshToken, String deviceId) {
+        Claims claims = jwtUtil.parseClaims(refreshToken);
+        Long userId = Long.parseLong(claims.getSubject());
+
+        String redisKey = REDIS_KEY_REFRESH + userId + ":" + deviceId;
+        String storedToken = redisTemplate.opsForValue().get(redisKey);
+
+        if (storedToken == null || !storedToken.equals(refreshToken)) {
+            throw new CustomException(ErrorCode.TOKEN_INVALID);
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String newAccessToken = jwtUtil.generateAccessToken(user);
+        String newRefreshToken = jwtUtil.generateRefreshToken(user);
+
+        redisTemplate.opsForValue().set(redisKey, newRefreshToken, 7, TimeUnit.DAYS);
+
+        return new LoginResponse(
+                newAccessToken,
+                newRefreshToken,
+                user.getUserId(),
+                user.getRole().name()
         );
     }
 }

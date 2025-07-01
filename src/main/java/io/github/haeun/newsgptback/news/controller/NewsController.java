@@ -32,7 +32,7 @@ import java.time.LocalDate;
 @Slf4j
 @AllArgsConstructor
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/news")
 @Tag(name = "뉴스 요약", description = "뉴스 기사 URL을 기반으로 GPT 요약을 수행하는 API")
 public class NewsController {
     private final NewsService newsService;
