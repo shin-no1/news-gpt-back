@@ -63,7 +63,7 @@ public class NewsController {
         if (current >= ANALYZE_LIMIT) {
             throw new CustomException(ErrorCode.RATE_LIMIT_EXCEEDED);
         }
-        NewsResponse newsResponse = newsService.getNewsResponse(newsRequest.getUrl(), ip);
+        NewsResponse newsResponse = newsService.getNewsResponse(newsRequest.getUrl(), ip, user);
         rateLimiter.incrementWithTtlIfNeeded(key, ANALYZE_TTL_SECONDS);
         return ResponseEntity
                 .status(HttpStatus.OK)

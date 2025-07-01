@@ -16,10 +16,12 @@ import io.github.haeun.newsgptback.news.domain.newsSummaryHistory.NewsSummaryHis
 import io.github.haeun.newsgptback.news.domain.newsSummaryHistory.NewsSummaryHistoryRepository;
 import io.github.haeun.newsgptback.news.domain.projection.NewsSummaryMetaProjection;
 import io.github.haeun.newsgptback.news.domain.site.Site;
+import io.github.haeun.newsgptback.news.domain.user.User;
 import io.github.haeun.newsgptback.news.dto.NewsResponse;
 import io.github.haeun.newsgptback.news.model.NewsInfo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -39,7 +41,7 @@ public class NewsService {
      * @param url 뉴스 기사 원문 URL
      * @return 요약된 뉴스 응답 객체
      */
-    public NewsResponse getNewsResponse(String url, String ip) {
+    public NewsResponse getNewsResponse(String url, String ip, User user) {
         long startTime = System.currentTimeMillis();
         if (!UriUtils.checkUrl(url)) {
             throw new CustomException(ErrorCode.INVALID_INPUT, "지원되지 않는 URL이 입력되었습니다.");
@@ -70,7 +72,7 @@ public class NewsService {
         saveLog(newsResponse, Math.round(endTime - startTime), summaryId == null);
 
         RequestLogMessage log = new RequestLogMessage(
-                null,
+                ObjectUtils.isEmpty(user) ? null : user.getId(),
                 ip,
                 url,
                 true,

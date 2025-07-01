@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
@@ -51,7 +52,7 @@ public class NewsControllerRestDocsTest {
         );
 
         // when
-        Mockito.when(newsService.getNewsResponse(anyString(), anyString())).thenReturn(mockResponse);
+        Mockito.when(newsService.getNewsResponse(anyString(), anyString(), any())).thenReturn(mockResponse);
 
         // then: RestDocs 문서화
         mockMvc.perform(post("/api/news/analyze-url")
