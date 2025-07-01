@@ -41,7 +41,7 @@ public class NewsControllerRestDocsTest {
     void analyzeUrl() throws Exception {
         // given
         String url = "https://n.news.naver.com/article/015/0005146248";
-        NewsRequest request = new NewsRequest(url);
+        NewsRequest request = new NewsRequest(url, false);
         NewsResponse mockResponse = new NewsResponse(
                 "뉴스 제목",
                 "요약된 본문",

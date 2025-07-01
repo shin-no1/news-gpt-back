@@ -10,7 +10,10 @@ public class NewsRequest {
     @Schema(description = "분석할 뉴스 기사 URL", example = "https://n.news.naver.com/article/015/0005146248")
     private String url;
 
-    public NewsRequest(String url) {
+    private boolean login;
+
+    public NewsRequest(String url, boolean login) {
         this.url = url;
+        this.login = login;
     }
 }

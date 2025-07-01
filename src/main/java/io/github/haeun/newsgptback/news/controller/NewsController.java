@@ -52,6 +52,9 @@ public class NewsController {
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = NewsResponse.class)))
     @PostMapping("/analyze-url")
     public ResponseEntity<?> analyzeUrl(@AuthenticationPrincipal User user, @RequestBody NewsRequest newsRequest, HttpServletRequest request) {
+        if (newsRequest.isLogin() && ObjectUtils.isEmpty(user)) {
+            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+        }
         int ANALYZE_LIMIT = ObjectUtils.isEmpty(user) ? 5 : user.getRole() == UserRole.ADMIN ? 100 : 10;
         int ANALYZE_TTL_SECONDS = 86400;
         String ip = request.getRemoteAddr();
