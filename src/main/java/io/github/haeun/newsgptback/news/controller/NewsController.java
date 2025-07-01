@@ -1,8 +1,10 @@
 package io.github.haeun.newsgptback.news.controller;
 
 import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.enums.UserRole;
 import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.common.util.RateLimiter;
+import io.github.haeun.newsgptback.news.domain.user.User;
 import io.github.haeun.newsgptback.news.dto.NewsRequest;
 import io.github.haeun.newsgptback.news.dto.NewsResponse;
 import io.github.haeun.newsgptback.news.service.NewsService;
@@ -18,6 +20,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,8 +51,9 @@ public class NewsController {
     @Parameters({@Parameter(name = "url", description = "URL", example = "https://n.news.naver.com/article/015/0005146248")})
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = NewsResponse.class)))
     @PostMapping("/analyze-url")
-    public ResponseEntity<?> analyzeUrl(@RequestBody NewsRequest newsRequest, HttpServletRequest request) {
-        int ANALYZE_LIMIT = 5, ANALYZE_TTL_SECONDS = 86400;
+    public ResponseEntity<?> analyzeUrl(@AuthenticationPrincipal User user, @RequestBody NewsRequest newsRequest, HttpServletRequest request) {
+        int ANALYZE_LIMIT = ObjectUtils.isEmpty(user) ? 5 : user.getRole() == UserRole.ADMIN ? 100 : 10;
+        int ANALYZE_TTL_SECONDS = 86400;
         String ip = request.getRemoteAddr();
         String key = "rate:" + ip + ":" + LocalDate.now();
         long current = rateLimiter.getCurrentCount(key);
