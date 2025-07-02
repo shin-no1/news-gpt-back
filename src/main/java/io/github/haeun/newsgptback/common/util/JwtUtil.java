@@ -51,7 +51,7 @@ public class JwtUtil {
                 .subject(String.valueOf(user.getId()))
                 .issuedAt(now)
                 .expiration(expiry)
-                .claim("userId", user.getUserId())
+                .claim("username", user.getUsername())
                 .claim("role", user.getRole().name())
                 .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();

@@ -82,7 +82,7 @@ class AuthControllerTest {
                         requestFields(
                                 fieldWithPath("email").description("사용자 이메일"),
                                 fieldWithPath("password").description("사용자 비밀번호"),
-                                fieldWithPath("userId").description("사용자 닉네임")
+                                fieldWithPath("username").description("사용자 닉네임")
                         )));
     }
 }

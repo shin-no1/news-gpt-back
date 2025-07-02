@@ -69,7 +69,7 @@ public class NewsService {
 
         NewsResponse newsResponse = new NewsResponse(newsInfo.title(), gptResponse.getSummary(), gptResponse.getTopic(), gptResponse.getKeywords(), url);
         long endTime = System.currentTimeMillis();
-        saveLog(newsResponse, Math.round(endTime - startTime), summaryId == null);
+        saveLog(newsResponse, ObjectUtils.isEmpty(user) ? null : user.getId(), Math.round(endTime - startTime), summaryId == null);
 
         RequestLogMessage log = new RequestLogMessage(
                 ObjectUtils.isEmpty(user) ? null : user.getId(),
@@ -98,7 +98,7 @@ public class NewsService {
     }
 
 
-    private void saveLog(NewsResponse newsResponse, int responseTimeMs, boolean isNew) {
+    private void saveLog(NewsResponse newsResponse, Long userId, int responseTimeMs, boolean isNew) {
         // 현재 site_id = 0, status = SUCCESS 고정
         NewsSummaryHistory history = new NewsSummaryHistory();
         Site site = new Site();
@@ -106,6 +106,7 @@ public class NewsService {
         String urlNum = UriUtils.getUrlNum(site, newsResponse.getUrl());
 
         history.setSite(site);
+        history.setUserId(userId);
         history.setTitle(newsResponse.getTitle());
         history.setUrlNum(urlNum);
         history.setUrl(newsResponse.getUrl());

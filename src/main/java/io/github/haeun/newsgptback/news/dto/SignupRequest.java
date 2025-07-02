@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SignupRequest {
     private String email;
-    private String nickname;
+    private String username;
     private String password;
 }

@@ -115,13 +115,13 @@ public class AuthService {
             throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
-        if (userRepository.existsByUserId(signupRequest.getNickname())) {
+        if (userRepository.existsByUsername(signupRequest.getUsername())) {
             emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, ErrorCode.NICKNAME_ALREADY_EXISTS, request));
             throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
         }
 
         String encodedPw = passwordEncoder.encode(signupRequest.getPassword());
-        User user = new User(signupRequest.getEmail(), signupRequest.getNickname(), encodedPw, true, UserRole.USER);
+        User user = new User(signupRequest.getEmail(), signupRequest.getUsername(), encodedPw, true, UserRole.USER);
         userRepository.save(user);
 
         redisTemplate.delete(REDIS_KEY_EMAIL_VERIFIED + signupRequest.getEmail());
@@ -170,15 +170,15 @@ public class AuthService {
      * @throws CustomException 이메일이나 비밀번호가 올바르지 않은 경우, 이메일이 인증되지 않은 경우 발생
      */
     public LoginResponse login(LoginRequest request) {
-        loginLockCheck(request.getUserId());
-        User user = userRepository.findByUserId(request.getUserId())
+        loginLockCheck(request.getUsername());
+        User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         if (!user.isEmailVerified()) {
             throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
 
-        String loginLockKey = REDIS_KEY_LOGIN_FAIL + user.getUserId();
+        String loginLockKey = REDIS_KEY_LOGIN_FAIL + user.getUsername();
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             redisTemplate.opsForValue().increment(loginLockKey);
             redisTemplate.expire(loginLockKey, 5, TimeUnit.MINUTES);
@@ -195,14 +195,14 @@ public class AuthService {
         return new LoginResponse(
                 accessToken,
                 refreshToken,
-                user.getUserId(),
+                user.getUsername(),
                 user.getRole().name()
         );
     }
 
-    private void loginLockCheck(String userId) {
+    private void loginLockCheck(String username) {
         int MAX_FAIL_COUNT = 5;
-        String key = REDIS_KEY_LOGIN_FAIL + userId;
+        String key = REDIS_KEY_LOGIN_FAIL + username;
 
         String failCountStr = redisTemplate.opsForValue().get(key);
         int failCount = failCountStr == null ? 0 : Integer.parseInt(failCountStr);
@@ -254,7 +254,7 @@ public class AuthService {
         return new LoginResponse(
                 newAccessToken,
                 newRefreshToken,
-                user.getUserId(),
+                user.getUsername(),
                 user.getRole().name()
         );
     }

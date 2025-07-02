@@ -26,7 +26,7 @@ public class User implements UserDetails {
     private String email;
 
     @Column(nullable = false, unique = true)
-    private String userId;
+    private String username;
 
     @Column(nullable = false)
     private String password;
@@ -41,9 +41,9 @@ public class User implements UserDetails {
 
     private final LocalDateTime createdAt = LocalDateTime.now();
 
-    public User(String email, String userId, String encodedPw, boolean emailVerified, UserRole role) {
+    public User(String email, String username, String encodedPw, boolean emailVerified, UserRole role) {
         this.email = email;
-        this.userId = userId;
+        this.username = username;
         this.password = encodedPw;
         this.emailVerified = emailVerified;
         this.role = role;
@@ -56,7 +56,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userId;
+        return username;
     }
 
     @Override
