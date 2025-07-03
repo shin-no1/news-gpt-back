@@ -3,6 +3,7 @@ package io.github.haeun.newsgptback.news.domain.newsSummaryHistory;
 import io.github.haeun.newsgptback.common.converter.StringListJsonConverter;
 import io.github.haeun.newsgptback.news.domain.site.Site;
 import io.github.haeun.newsgptback.common.enums.HistorySource;
+import io.github.haeun.newsgptback.news.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +24,9 @@ public class NewsSummaryHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)

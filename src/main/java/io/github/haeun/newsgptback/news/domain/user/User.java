@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
-@Table(name = "users")
+@Table(name = "user")
 @Getter
 @NoArgsConstructor
+@Entity
 public class User implements UserDetails {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,6 +47,10 @@ public class User implements UserDetails {
         this.password = encodedPw;
         this.emailVerified = emailVerified;
         this.role = role;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     @Override

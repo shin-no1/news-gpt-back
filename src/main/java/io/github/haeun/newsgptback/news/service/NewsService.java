@@ -106,7 +106,9 @@ public class NewsService {
         String urlNum = UriUtils.getUrlNum(site, newsResponse.getUrl());
 
         history.setSite(site);
-        history.setUserId(userId);
+        history.setUser(new User() {{
+            setId(userId);
+        }});
         history.setTitle(newsResponse.getTitle());
         history.setUrlNum(urlNum);
         history.setUrl(newsResponse.getUrl());
