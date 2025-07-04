@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <property name="COLORED_PATTERN">
+        %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%replace(%level){'DEBUG','\u001B[36mDEBUG\u001B[0m','INFO','\u001B[32mINFO\u001B[0m','WARN','\u001B[33mWARN\u001B[0m','ERROR','\u001B[31mERROR\u001B[0m'}] %logger{36} - %msg%n
+    </property>
+    <property name="PLAIN_PATTERN">
+        %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%-5level] %logger{36} - %msg%n
+    </property>
+    <Properties>
+        <Property name="LOG_LEVEL_PATTERN">{%5p}{FATAL=red blink, ERROR=red bold, WARN=yellow bold, INFO=green bold, DEBUG=blue bold, TRACE=blue}</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout disableAnsi="false" pattern="%style{%d{yyyy-MM-dd HH:mm:ss.SSS}}{magenta} %highlight${LOG_LEVEL_PATTERN} %style{[%c{1.1.1.*}]}{cyan} %m%n" />
+        </Console>
+        <RollingFile name="InfoFile" fileName="logs/info/service-info.log" filePattern="logs/info/service-info%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+        <RollingFile name="ErrorFile" fileName="logs/error/service-error.log" filePattern="logs/error/service-error-%d{yyyy-MM-dd}.log.gz">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Spring Boot / Web -->
+        <Logger name="org.springframework" level="INFO"/>
+        <Logger name="org.springframework.boot" level="INFO"/>
+        <Logger name="org.springframework.web" level="INFO"/>
+
+        <!-- Hibernate / JPA -->
+        <Logger name="org.hibernate" level="INFO"/>
+        <Logger name="org.hibernate.SQL" level="DEBUG"/>
+        <Logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE"/>
+
+        <!-- Kafka -->
+        <Logger name="org.apache.kafka" level="INFO"/>
+
+        <!-- 기타 -->
+        <Logger name="io.github.haeun" level="DEBUG"/>
+
+        <!-- 루트 -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="InfoFile"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Root>
+    </Loggers>
+</Configuration>
