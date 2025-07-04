@@ -15,6 +15,10 @@ Given a news article, respond in **Korean only**, in the following strict JSON f
 }
 
 Do not include any other text.
+Make sure the entire response does not exceed {max_tokens} tokens total.
+If the article is long, prioritize keeping the JSON structure complete.
+If necessary, shorten the summary first, and **never omit** the "topic" and "keywords" fields.
+Keep the summary concise (2–4 sentences max), and use compact expressions.
 
 === STRUCTURED_SUMMARY_PROMPT ===
 Here is a summary of a news article.

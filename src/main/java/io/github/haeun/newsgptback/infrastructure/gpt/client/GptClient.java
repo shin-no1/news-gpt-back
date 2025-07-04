@@ -48,7 +48,7 @@ public class GptClient {
             long startTime = System.currentTimeMillis();
 
             ChatCompletionCreateParams params = ChatCompletionCreateParams.builder()
-                    .addSystemMessage(systemPrompt.get("request"))
+                    .addSystemMessage(systemPrompt.get("request").replace("{max_tokens}", String.valueOf(maxTokens)))
                     .addUserMessage("Summarize the following news article using the format defined in the system prompt:\n" + newsInfo.content())
                     .model(ChatModel.GPT_3_5_TURBO)
                     .temperature(temperature)
