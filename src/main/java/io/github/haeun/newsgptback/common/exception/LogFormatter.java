@@ -3,7 +3,6 @@ package io.github.haeun.newsgptback.common.exception;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
 
@@ -17,14 +16,15 @@ public class LogFormatter {
 
     private static final Set<String> SENSITIVE_FIELDS = Set.of("password", "accessToken", "refreshToken");
 
-    public static String formatExceptionJson(String trackingId, Exception e, HttpServletRequest request) {
-        return formatExceptionJson(trackingId, null, null, request, null, null, e);
+    public static String formatExceptionJson(String trackingId, Exception e, HttpServletRequest request, int status) {
+        return formatExceptionJson(trackingId, null, null, request, null, null, status, e);
     }
 
     public static String formatExceptionJson(String trackingId, Instant startTime, Instant endTime,
                                              HttpServletRequest request,
                                              ContentCachingRequestWrapper wrappedRequest,
                                              ContentCachingResponseWrapper wrappedResponse,
+                                             int status,
                                              Exception e) {
         long durationMs = (startTime != null && endTime != null)
                 ? Duration.between(startTime, endTime).toMillis()
@@ -63,7 +63,7 @@ public class LogFormatter {
                 safe(endTime != null ? endTime.toString() : null),
                 durationMs,
                 method,
-                getStatusCode(e, wrappedResponse),
+                status,
                 uri,
                 query,
                 clientIp,
@@ -160,18 +160,4 @@ public class LogFormatter {
         return json;
     }
 
-    public static int getStatusCode(Exception exception, ContentCachingResponseWrapper response) {
-        int status;
-        if (exception != null) {
-            status = 500;
-        } else if (response != null) {
-            status = response.getStatus();
-            if (status < 100 || status > 599) {
-                status = 500;
-            }
-        } else {
-            status = 500;
-        }
-        return status;
-    }
 }

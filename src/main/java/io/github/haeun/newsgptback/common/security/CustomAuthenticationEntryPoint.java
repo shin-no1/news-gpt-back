@@ -37,7 +37,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
                          AuthenticationException authException) throws IOException {
 
         String trackingId = MDC.get("trackingId");
-        log.warn(LogFormatter.formatExceptionJson(trackingId, authException, request));
+        log.warn(LogFormatter.formatExceptionJson(trackingId, authException, request, 401));
         log.error("[{}] Full stack trace", trackingId, authException);
 
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

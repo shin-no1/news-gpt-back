@@ -40,8 +40,8 @@ public class LoggingFilter extends OncePerRequestFilter {
             String trackingId = MDC.get("trackingId");
             Instant endTime = Instant.now();
 
-            String logJson = LogFormatter.formatExceptionJson(trackingId, startTime, endTime, request, wrappedRequest, wrappedResponse, exception);
-            int status = LogFormatter.getStatusCode(exception, wrappedResponse);
+            int status = getStatusCode(exception, wrappedResponse);
+            String logJson = LogFormatter.formatExceptionJson(trackingId, startTime, endTime, request, wrappedRequest, wrappedResponse, status, exception);
             if (exception != null) {
                 log.error(logJson);
                 log.error("[{}] Full stack trace", trackingId, exception);
@@ -57,5 +57,20 @@ public class LoggingFilter extends OncePerRequestFilter {
 
             wrappedResponse.copyBodyToResponse();
         }
+    }
+
+    protected int getStatusCode(Exception exception, ContentCachingResponseWrapper response) {
+        int status;
+        if (exception != null) {
+            status = 500;
+        } else if (response != null) {
+            status = response.getStatus();
+            if (status < 100 || status > 599) {
+                status = 500;
+            }
+        } else {
+            status = 500;
+        }
+        return status;
     }
 }

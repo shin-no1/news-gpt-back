@@ -37,7 +37,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                        AccessDeniedException accessDeniedException) throws IOException {
 
         String trackingId = MDC.get("trackingId");
-        log.warn(LogFormatter.formatExceptionJson(trackingId, accessDeniedException, request));
+        log.warn(LogFormatter.formatExceptionJson(trackingId, accessDeniedException, request, 403));
         log.error("[{}] Full stack trace", trackingId, accessDeniedException);
 
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
