@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
@@ -21,21 +23,36 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/send-code")
-    public ResponseEntity<Void> sendCode(@RequestBody EmailRequest emailRequest, HttpServletRequest request) {
+    public ResponseEntity<HashMap<String, String>> sendCode(@RequestBody EmailRequest emailRequest, HttpServletRequest request) {
         authService.sendEmailCode(emailRequest.getEmail(), request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new HashMap<>() {{
+                    put("message", "인증 코드 발송");
+                }});
     }
 
     @PostMapping("/verify-code")
-    public ResponseEntity<Void> verifyCode(@RequestBody EmailCodeVerifyRequest verifyRequest, HttpServletRequest request) {
+    public ResponseEntity<HashMap<String, String>> verifyCode(@RequestBody EmailCodeVerifyRequest verifyRequest, HttpServletRequest request) {
         authService.verifyEmailCode(verifyRequest, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new HashMap<>() {{
+                    put("message", "인증 완료");
+                }});
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signup(@RequestBody SignupRequest signupRequest, HttpServletRequest request) {
+    public ResponseEntity<HashMap<String, String>> signup(@RequestBody SignupRequest signupRequest, HttpServletRequest request) {
         authService.signup(signupRequest, request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new HashMap<>() {{
+                    put("message", "로그아웃 되었습니다.");
+                }});
     }
 
     @PostMapping("/login")
@@ -48,10 +65,15 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@AuthenticationPrincipal User user,
-                                         @RequestHeader("X-Device-Id") String deviceId) {
+    public ResponseEntity<HashMap<String, String>> logout(@AuthenticationPrincipal User user,
+                                                          @RequestHeader("X-Device-Id") String deviceId) {
         authService.logout(user, deviceId);
-        return ResponseEntity.ok("로그아웃 되었습니다.");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(new HashMap<>() {{
+                    put("message", "로그아웃 되었습니다.");
+                }});
     }
 
     @PostMapping("/reissue")
