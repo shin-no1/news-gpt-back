@@ -1,6 +1,7 @@
 package io.github.haeun.newsgptback.common.config;
 
 import io.github.haeun.newsgptback.common.filter.JwtAuthenticationFilter;
+import io.github.haeun.newsgptback.common.filter.MdcFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,7 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    private final MdcFilter mdcFilter;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -39,6 +41,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/news/**").permitAll()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(mdcFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
