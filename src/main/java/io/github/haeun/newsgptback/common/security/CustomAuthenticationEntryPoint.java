@@ -35,17 +35,17 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
-
+        int status = HttpServletResponse.SC_UNAUTHORIZED;
         String trackingId = MDC.get("trackingId");
-        log.warn(LogFormatter.formatExceptionJson(trackingId, authException, request, 401));
+        log.warn(LogFormatter.formatExceptionJson(trackingId, authException, request, status));
         log.error("[{}] Full stack trace", trackingId, authException);
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         Map<String, Object> body = Map.of(
-                "status", 401,
+                "status", status,
                 "code", "UNAUTHORIZED",
                 "message", "인증이 필요합니다."
         );

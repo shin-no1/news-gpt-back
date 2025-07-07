@@ -35,17 +35,17 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
                        AccessDeniedException accessDeniedException) throws IOException {
-
+        int status = HttpServletResponse.SC_FORBIDDEN;
         String trackingId = MDC.get("trackingId");
-        log.warn(LogFormatter.formatExceptionJson(trackingId, accessDeniedException, request, 403));
+        log.warn(LogFormatter.formatExceptionJson(trackingId, accessDeniedException, request, status));
         log.error("[{}] Full stack trace", trackingId, accessDeniedException);
 
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         Map<String, Object> body = Map.of(
-                "status", 403,
+                "status", status,
                 "code", "FORBIDDEN",
                 "message", "접근 권한이 없습니다."
         );
