@@ -43,15 +43,15 @@ public class LoggingFilter extends OncePerRequestFilter {
             int status = getStatusCode(exception, wrappedResponse);
             String logJson = LogFormatter.formatExceptionJson(trackingId, startTime, endTime, request, wrappedRequest, wrappedResponse, status, exception);
             if (exception != null) {
-                log.error(logJson);
+                log.error("{}", logJson);
                 log.error("[{}] Full stack trace", trackingId, exception);
             } else {
                 if (status >= 500) {
-                    log.error(logJson);
+                    log.error("{}", logJson);
                 } else if (status >= 400) {
-                    log.warn(logJson);
+                    log.warn("{}", logJson);
                 } else {
-                    log.info(logJson);
+                    log.info("{}", logJson);
                 }
             }
 
