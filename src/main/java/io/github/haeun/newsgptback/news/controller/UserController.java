@@ -1,6 +1,6 @@
 package io.github.haeun.newsgptback.news.controller;
 
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.enums.errorCode.AuthErrorCode;
 import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.news.domain.user.User;
 import io.github.haeun.newsgptback.news.dto.UserInfoResponse;
@@ -20,7 +20,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserInfoResponse> getMyInfo(@AuthenticationPrincipal User user) {
         if (user == null) {
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+            throw new CustomException(AuthErrorCode.TOKEN_EXPIRED);
         }
         return ResponseEntity
                 .status(HttpStatus.OK)

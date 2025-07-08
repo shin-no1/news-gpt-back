@@ -1,6 +1,7 @@
 package io.github.haeun.newsgptback.controller;
 
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.enums.errorCode.AuthErrorCode;
+import io.github.haeun.newsgptback.common.enums.errorCode.RequestErrorCode;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
@@ -13,10 +14,17 @@ public class DocsTest {
     void generateErrorCodeAdoc() throws Exception {
         StringBuilder sb = new StringBuilder();
         sb.append("|===\n");
-        sb.append("| 코드 | 이름 | 설명\n\n");
+        sb.append("| 분류 | 코드 | 이름 | 설명\n\n");
 
-        for (ErrorCode code : ErrorCode.values()) {
-            sb.append("| ").append(code.getHttpStatus())
+        for (RequestErrorCode code : RequestErrorCode.values()) {
+            sb.append("| ").append("Request")
+                    .append("|").append(code.getHttpStatus())
+                    .append("| ").append(code.name())
+                    .append(" | ").append(code.getMessage()).append("\n");
+        }
+        for (AuthErrorCode code : AuthErrorCode.values()) {
+            sb.append("| ").append("Auth")
+                    .append("|").append(code.getHttpStatus())
                     .append("| ").append(code.name())
                     .append(" | ").append(code.getMessage()).append("\n");
         }

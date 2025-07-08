@@ -1,6 +1,7 @@
 package io.github.haeun.newsgptback.news.controller;
 
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.enums.errorCode.AuthErrorCode;
+import io.github.haeun.newsgptback.common.enums.errorCode.RequestErrorCode;
 import io.github.haeun.newsgptback.common.enums.UserRole;
 import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.common.util.RateLimiter;
@@ -53,7 +54,7 @@ public class NewsController {
     @PostMapping("/analyze-url")
     public ResponseEntity<?> analyzeUrl(@AuthenticationPrincipal User user, @RequestBody NewsRequest newsRequest, HttpServletRequest request) {
         if (newsRequest.isLogin() && ObjectUtils.isEmpty(user)) {
-            throw new CustomException(ErrorCode.TOKEN_EXPIRED);
+            throw new CustomException(AuthErrorCode.TOKEN_EXPIRED);
         }
         int ANALYZE_LIMIT = ObjectUtils.isEmpty(user) ? 5 : user.getRole() == UserRole.ADMIN ? 100 : 10;
         int ANALYZE_TTL_SECONDS = 86400;
@@ -61,7 +62,7 @@ public class NewsController {
         String key = "rate:" + ip + ":" + LocalDate.now();
         long current = rateLimiter.getCurrentCount(key);
         if (current >= ANALYZE_LIMIT) {
-            throw new CustomException(ErrorCode.RATE_LIMIT_EXCEEDED);
+            throw new CustomException(RequestErrorCode.RATE_LIMIT_EXCEEDED);
         }
         NewsResponse newsResponse = newsService.getNewsResponse(newsRequest.getUrl(), ip, user);
         rateLimiter.incrementWithTtlIfNeeded(key, ANALYZE_TTL_SECONDS);

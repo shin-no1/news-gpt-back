@@ -1,7 +1,7 @@
 package io.github.haeun.newsgptback.news.service;
 
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
 import io.github.haeun.newsgptback.common.enums.HistorySource;
+import io.github.haeun.newsgptback.common.enums.errorCode.RequestErrorCode;
 import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.common.parser.JsoupNewsParser;
 import io.github.haeun.newsgptback.common.util.UriUtils;
@@ -44,11 +44,11 @@ public class NewsService {
     public NewsResponse getNewsResponse(String url, String ip, User user) {
         long startTime = System.currentTimeMillis();
         if (!UriUtils.checkUrl(url)) {
-            throw new CustomException(ErrorCode.INVALID_INPUT, "지원되지 않는 URL이 입력되었습니다.");
+            throw new CustomException(RequestErrorCode.INVALID_INPUT, "지원되지 않는 URL이 입력되었습니다.");
         }
         NewsInfo newsInfo = jsoupNewsParser.parse(url);
         if (newsInfo == null) {
-            throw new CustomException(ErrorCode.INTERNAL_ERROR);
+            throw new CustomException(RequestErrorCode.INTERNAL_ERROR);
         }
 
         Long summaryId = getSummaryId(newsInfo);
@@ -57,7 +57,7 @@ public class NewsService {
         if (summaryId == null) {
             gptResponse = gptClient.summarize(newsInfo);
             if (gptResponse == null) {
-                throw new CustomException(ErrorCode.INTERNAL_ERROR);
+                throw new CustomException(RequestErrorCode.INTERNAL_ERROR);
             }
         } else {
             NewsSummaryHistory newsSummaryHistory = newsSummaryHistoryRepository.findById(summaryId).get();
@@ -69,7 +69,8 @@ public class NewsService {
 
         NewsResponse newsResponse = new NewsResponse(newsInfo.title(), gptResponse.getSummary(), gptResponse.getTopic(), gptResponse.getKeywords(), url);
         long endTime = System.currentTimeMillis();
-        saveLog(newsResponse, ObjectUtils.isEmpty(user) ? null : user.getId(), Math.round(endTime - startTime), summaryId == null);
+        long summaryHistoryId = saveLog(newsResponse, ObjectUtils.isEmpty(user) ? null : user.getId(), Math.round(endTime - startTime), summaryId == null);
+        newsResponse.setSummaryHistoryId(summaryHistoryId);
 
         RequestLogMessage log = new RequestLogMessage(
                 ObjectUtils.isEmpty(user) ? null : user.getId(),
@@ -98,7 +99,7 @@ public class NewsService {
     }
 
 
-    private void saveLog(NewsResponse newsResponse, Long userId, int responseTimeMs, boolean isNew) {
+    private long saveLog(NewsResponse newsResponse, Long userId, int responseTimeMs, boolean isNew) {
         // 현재 site_id = 0, status = SUCCESS 고정
         NewsSummaryHistory history = new NewsSummaryHistory();
         Site site = new Site();
@@ -107,9 +108,7 @@ public class NewsService {
 
         history.setSite(site);
         if (userId != null) {
-            history.setUser(new User() {{
-                setId(userId);
-            }});
+            history.setUser(new User(userId));
         }
         history.setTitle(newsResponse.getTitle());
         history.setUrlNum(urlNum);
@@ -122,7 +121,7 @@ public class NewsService {
         history.setResponseTimeMs(responseTimeMs);
         history.setSource(isNew ? HistorySource.NEW : HistorySource.CACHE);
 
-        newsSummaryHistoryRepository.save(history);
+        NewsSummaryHistory newsSummaryHistory = newsSummaryHistoryRepository.save(history);
 
         if (isNew) {
             SummaryId summaryId = new SummaryId(site.getId(), urlNum);
@@ -141,6 +140,8 @@ public class NewsService {
                 newsSummaryRepository.save(newsSummary); // INSERT
             }
         }
+
+        return newsSummaryHistory.getId();
     }
 
 

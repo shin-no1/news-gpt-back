@@ -1,20 +1,20 @@
 package io.github.haeun.newsgptback.common.exception;
 
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.enums.errorCode.base.ErrorCodeBase;
 import lombok.Getter;
 
 @Getter
 public class CustomException extends RuntimeException {
-    private final ErrorCode errorCode;
+    private final ErrorCodeBase errorCode;
     private final String customMessage;
 
-    public CustomException(ErrorCode errorCode) {
+    public CustomException(ErrorCodeBase errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
         this.customMessage = null;
     }
 
-    public CustomException(ErrorCode errorCode, String customMessage) {
+    public CustomException(ErrorCodeBase errorCode, String customMessage) {
         super(customMessage);
         this.errorCode = errorCode;
         this.customMessage = customMessage;

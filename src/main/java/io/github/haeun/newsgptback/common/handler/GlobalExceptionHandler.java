@@ -1,6 +1,6 @@
 package io.github.haeun.newsgptback.common.handler;
 
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
+import io.github.haeun.newsgptback.common.enums.errorCode.base.ErrorCodeBase;
 import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.common.exception.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,10 +18,10 @@ import java.nio.charset.StandardCharsets;
 public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(CustomException e, HttpServletResponse servletResponse) {
-        ErrorCode errorCode = e.getErrorCode();
+        ErrorCodeBase errorCode = e.getErrorCode();
         ErrorResponse response = new ErrorResponse(
                 errorCode.getHttpStatus().value(),
-                errorCode.name(),
+                errorCode.getHttpStatus().name(),
                 e.getMessageToShow()
         );
         servletResponse.setStatus(errorCode.getHttpStatus().value());

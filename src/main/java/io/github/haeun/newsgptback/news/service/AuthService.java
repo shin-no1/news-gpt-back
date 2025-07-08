@@ -1,9 +1,8 @@
 package io.github.haeun.newsgptback.news.service;
 
-import io.github.haeun.newsgptback.common.enums.EmailVerificationAction;
-import io.github.haeun.newsgptback.common.enums.EmailVerificationStatus;
-import io.github.haeun.newsgptback.common.enums.ErrorCode;
-import io.github.haeun.newsgptback.common.enums.UserRole;
+import io.github.haeun.newsgptback.common.enums.*;
+import io.github.haeun.newsgptback.common.enums.errorCode.base.ErrorCodeBase;
+import io.github.haeun.newsgptback.common.enums.errorCode.AuthErrorCode;
 import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.common.util.JwtUtil;
 import io.github.haeun.newsgptback.news.domain.emailVerificationLog.EmailVerificationLog;
@@ -51,13 +50,13 @@ public class AuthService {
      */
     public void sendEmailCode(String email, HttpServletRequest request) {
         if (!email.endsWith("@naver.com") && !email.endsWith("@kakao.com")) {
-            emailVerificationLogRepository.save(createFailLogForSendCode(email, ErrorCode.EMAIL_DOMAIN_NOT_ALLOWED, request));
-            throw new CustomException(ErrorCode.EMAIL_DOMAIN_NOT_ALLOWED);
+            emailVerificationLogRepository.save(createFailLogForSendCode(email, AuthErrorCode.EMAIL_DOMAIN_NOT_ALLOWED, request));
+            throw new CustomException(AuthErrorCode.EMAIL_DOMAIN_NOT_ALLOWED);
         }
 
         if (userRepository.existsByEmail(email)) {
-            emailVerificationLogRepository.save(createFailLogForSendCode(email, ErrorCode.EMAIL_ALREADY_EXISTS, request));
-            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            emailVerificationLogRepository.save(createFailLogForSendCode(email, AuthErrorCode.EMAIL_ALREADY_EXISTS, request));
+            throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         String code = String.format("%06d", new Random().nextInt(1000000));
@@ -83,11 +82,11 @@ public class AuthService {
                     verifyRequest.getEmail(),
                     EmailVerificationAction.VERIFY_CODE,
                     EmailVerificationStatus.FAIL,
-                    ErrorCode.EMAIL_CODE_INVALID.getMessage(),
+                    AuthErrorCode.EMAIL_CODE_INVALID.getMessage(),
                     request.getRemoteAddr(),
                     request.getHeader("User-Agent")
             ));
-            throw new CustomException(ErrorCode.EMAIL_CODE_INVALID);
+            throw new CustomException(AuthErrorCode.EMAIL_CODE_INVALID);
         }
 
         redisTemplate.delete(key);
@@ -106,18 +105,18 @@ public class AuthService {
      */
     public void signup(SignupRequest signupRequest, HttpServletRequest request) {
         if (!"true".equals(redisTemplate.opsForValue().get(REDIS_KEY_EMAIL_VERIFIED + signupRequest.getEmail()))) {
-            emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, ErrorCode.EMAIL_NOT_VERIFIED, request));
-            throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
+            emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, AuthErrorCode.EMAIL_NOT_VERIFIED, request));
+            throw new CustomException(AuthErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, ErrorCode.EMAIL_ALREADY_EXISTS, request));
-            throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, AuthErrorCode.EMAIL_ALREADY_EXISTS, request));
+            throw new CustomException(AuthErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
-            emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, ErrorCode.NICKNAME_ALREADY_EXISTS, request));
-            throw new CustomException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+            emailVerificationLogRepository.save(createFailLogForSignup(signupRequest, AuthErrorCode.NICKNAME_ALREADY_EXISTS, request));
+            throw new CustomException(AuthErrorCode.NICKNAME_ALREADY_EXISTS);
         }
 
         String encodedPw = passwordEncoder.encode(signupRequest.getPassword());
@@ -139,7 +138,7 @@ public class AuthService {
         );
     }
 
-    private EmailVerificationLog createFailLogForSendCode(String email, ErrorCode errorCode, HttpServletRequest request) {
+    private EmailVerificationLog createFailLogForSendCode(String email, ErrorCodeBase errorCode, HttpServletRequest request) {
         return new EmailVerificationLog(
                 email,
                 EmailVerificationAction.SIGN_UP,
@@ -150,7 +149,7 @@ public class AuthService {
         );
     }
 
-    private EmailVerificationLog createFailLogForSignup(SignupRequest dto, ErrorCode errorCode, HttpServletRequest request) {
+    private EmailVerificationLog createFailLogForSignup(SignupRequest dto, ErrorCodeBase errorCode, HttpServletRequest request) {
         return new EmailVerificationLog(
                 dto.getEmail(),
                 EmailVerificationAction.SIGN_UP,
@@ -172,17 +171,17 @@ public class AuthService {
     public LoginResponse login(LoginRequest request) {
         loginLockCheck(request.getUsername());
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
 
         if (!user.isEmailVerified()) {
-            throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
+            throw new CustomException(AuthErrorCode.EMAIL_NOT_VERIFIED);
         }
 
         String loginLockKey = REDIS_KEY_LOGIN_FAIL + user.getUsername();
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             redisTemplate.opsForValue().increment(loginLockKey);
             redisTemplate.expire(loginLockKey, 5, TimeUnit.MINUTES);
-            throw new CustomException(ErrorCode.INVALID_CREDENTIALS);
+            throw new CustomException(AuthErrorCode.INVALID_CREDENTIALS);
         }
 
         String accessToken = jwtUtil.generateAccessToken(user);
@@ -208,7 +207,7 @@ public class AuthService {
         int failCount = failCountStr == null ? 0 : Integer.parseInt(failCountStr);
 
         if (failCount >= MAX_FAIL_COUNT) {
-            throw new CustomException(ErrorCode.LOGIN_LOCKED);
+            throw new CustomException(AuthErrorCode.LOGIN_LOCKED);
         }
     }
 
@@ -241,11 +240,11 @@ public class AuthService {
         String storedToken = redisTemplate.opsForValue().get(redisKey);
 
         if (storedToken == null || !storedToken.equals(refreshToken)) {
-            throw new CustomException(ErrorCode.TOKEN_INVALID);
+            throw new CustomException(AuthErrorCode.TOKEN_INVALID);
         }
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(AuthErrorCode.USER_NOT_FOUND));
         String newAccessToken = jwtUtil.generateAccessToken(user);
         String newRefreshToken = jwtUtil.generateRefreshToken(user);
 
