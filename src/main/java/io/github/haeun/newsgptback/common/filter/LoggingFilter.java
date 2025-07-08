@@ -40,6 +40,7 @@ public class LoggingFilter extends OncePerRequestFilter {
             String trackingId = MDC.get("trackingId");
             Instant endTime = Instant.now();
 
+            exception = getException(wrappedRequest, exception);
             int status = getStatusCode(exception, wrappedResponse);
             String logJson = LogFormatter.formatExceptionJson(trackingId, startTime, endTime, request, wrappedRequest, wrappedResponse, status, exception);
             if (exception != null) {
@@ -72,5 +73,13 @@ public class LoggingFilter extends OncePerRequestFilter {
             status = 500;
         }
         return status;
+    }
+
+    private Exception getException(ContentCachingRequestWrapper request, Exception e) {
+        Exception exception = (Exception) request.getAttribute("FILTER_EXCEPTION");
+        if (exception != null) {
+            return exception;
+        }
+        return e;
     }
 }

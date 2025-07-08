@@ -43,7 +43,7 @@ public class LogFormatter {
 
         String requestBody = getFilteredRequestBody(wrappedRequest);
         String responseBody = getResponseBody(wrappedResponse);
-        String exceptionField = getExceptionField(e);
+        String exceptionField = getExceptionField(wrappedRequest, e);
 
         Map<String, Object> logMap = new LinkedHashMap<>();
         logMap.put("trackingId", trackingId);
@@ -175,9 +175,9 @@ public class LogFormatter {
         }
     }
 
-    private static String getExceptionField(Exception e) {
+    private static String getExceptionField(ContentCachingRequestWrapper request, Exception e) {
         if (e == null) {
-            return "null";
+            return null;
         }
         Map<String, Object> logMap = new LinkedHashMap<>();
         logMap.put("type", e.getClass().getName());
@@ -188,8 +188,8 @@ public class LogFormatter {
                 .collect(Collectors.joining("\\n")) + "\\n...");
         try {
             return new ObjectMapper().writeValueAsString(logMap);
-        } catch (Exception exception) {
-            log.error("ERROR!", exception);
+        } catch (Exception ex) {
+            log.error("ERROR!", ex);
             return null;
         }
 //        return String.format("""

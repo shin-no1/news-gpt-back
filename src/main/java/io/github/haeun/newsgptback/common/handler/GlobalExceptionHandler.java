@@ -3,6 +3,7 @@ package io.github.haeun.newsgptback.common.handler;
 import io.github.haeun.newsgptback.common.enums.errorCode.base.ErrorCodeBase;
 import io.github.haeun.newsgptback.common.exception.CustomException;
 import io.github.haeun.newsgptback.common.exception.dto.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,8 @@ import java.nio.charset.StandardCharsets;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e, HttpServletResponse servletResponse) {
+    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e, HttpServletResponse servletResponse, HttpServletRequest request) {
+        request.setAttribute("FILTER_EXCEPTION", e);
         ErrorCodeBase errorCode = e.getErrorCode();
         ErrorResponse response = new ErrorResponse(
                 errorCode.getHttpStatus().value(),
@@ -32,7 +34,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(HttpServletResponse servletResponse) {
+    public ResponseEntity<ErrorResponse> handleException(Exception e, HttpServletResponse servletResponse, HttpServletRequest request) {
+        request.setAttribute("FILTER_EXCEPTION", e);
         ErrorResponse response = new ErrorResponse(
                 500,
                 "INTERNAL_ERROR",
