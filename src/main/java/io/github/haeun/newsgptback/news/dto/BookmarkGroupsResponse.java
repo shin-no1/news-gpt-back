@@ -6,6 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class BookmarkGroupsResponse {
+    private Long id;
     private Long displayOrder;
     private String name;
 }

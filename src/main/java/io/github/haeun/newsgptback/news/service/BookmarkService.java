@@ -143,7 +143,7 @@ public class BookmarkService {
     public List<BookmarkGroupsResponse> getBookmarkGroup(long userId) {
         List<BookmarkGroup> bookmarkGroups = getBookmarkGroupByUser(userId);
         return bookmarkGroups.stream()
-                .map(group -> new BookmarkGroupsResponse(group.getDisplayOrder(), group.getName()))
+                .map(group -> new BookmarkGroupsResponse(group.getDisplayOrder(), group.getId(), group.getName()))
                 .collect(Collectors.toList());
     }
 
