@@ -24,8 +24,18 @@ public class NewsResponse {
     @Schema(description = "요약 대상 뉴스 URL")
     private String url;
 
-    public NewsResponse(String title, String summary) {
+    @Schema(description = "요약 번호")
+    private long summaryHistoryId;
+
+    public NewsResponse(String title, String summary, String topic, List<String> keywords, String url) {
         this.title = title;
         this.summary = summary;
+        this.topic = topic;
+        this.keywords = keywords;
+        this.url = url;
+    }
+
+    public void setSummaryHistoryId(long summaryHistoryId) {
+        this.summaryHistoryId = summaryHistoryId;
     }
 }

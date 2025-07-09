@@ -43,6 +43,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/me").permitAll()
                         .requestMatchers("/api/user/**").authenticated()
                         .requestMatchers("/api/news/**").permitAll()
+                        .requestMatchers("/api/bookmarks/**").authenticated()
+                        .requestMatchers("/api/bookmark-groups/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

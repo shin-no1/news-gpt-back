@@ -2,6 +2,7 @@ package io.github.haeun.newsgptback.news.domain.user;
 
 import io.github.haeun.newsgptback.common.enums.UserRole;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Table(name = "user")
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 public class User implements UserDetails {
@@ -49,7 +51,7 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public void setId(Long id) {
+    public User(Long id) {
         this.id = id;
     }
 
