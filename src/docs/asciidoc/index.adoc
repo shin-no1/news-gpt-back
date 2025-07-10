@@ -3,30 +3,18 @@
 :source-highlighter: highlightjs
 :snippets: {snippets}
 
-== 회원 가입
+== 1. 회원 가입
+include::service/auth.adoc[]
 
-=== 코드 전송
-include::{snippets}/auth-send-code/http-request.adoc[]
-include::{snippets}/auth-send-code/http-response.adoc[]
-include::{snippets}/auth-send-code/request-fields.adoc[]
-
-=== 코드 확인
-include::{snippets}/auth-verify-code/http-request.adoc[]
-include::{snippets}/auth-verify-code/http-response.adoc[]
-include::{snippets}/auth-verify-code/request-fields.adoc[]
-
-=== 가입
-include::{snippets}/auth-signup/http-request.adoc[]
-include::{snippets}/auth-signup/http-response.adoc[]
-include::{snippets}/auth-signup/request-fields.adoc[]
-
-
-== 뉴스 요약 요청
-
+== 2. 뉴스 요약 요청
 include::{snippets}/analyze-url/http-request.adoc[]
 include::{snippets}/analyze-url/http-response.adoc[]
 include::{snippets}/analyze-url/request-fields.adoc[]
 include::{snippets}/analyze-url/response-fields.adoc[]
 
-== Error code
+== 3. 북마크
+include::service/bookmark.adoc[]
+
+== * ERROR CODE
 include::{snippets}/error-codes/generated-error-codes.adoc[]
+

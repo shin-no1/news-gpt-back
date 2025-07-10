@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -63,7 +64,9 @@ public class BookmarkController {
         bookmarkService.deleteBookmark(user.getId(), bookmarkId);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body("삭제가 완료되었습니다.");
+                .body(new HashMap<>() {{
+                    put("message", "인증 코드 발송");
+                }});
     }
 
     @GetMapping("/bookmark-groups")

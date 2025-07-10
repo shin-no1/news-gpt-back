@@ -1,0 +1,49 @@
+=== [GET] 북마크 리스트
+include::{snippets}/get-bookmarks/http-request.adoc[]
+include::{snippets}/get-bookmarks/http-response.adoc[]
+include::{snippets}/get-bookmarks/response-fields.adoc[]
+
+=== [POST] 북마크 추가
+include::{snippets}/save-bookmark/http-request.adoc[]
+include::{snippets}/save-bookmark/http-response.adoc[]
+include::{snippets}/save-bookmark/request-fields.adoc[]
+include::{snippets}/save-bookmark/response-fields.adoc[]
+
+=== [PUT] 북마크의 그룹 수정
+include::{snippets}/put-bookmark/http-request.adoc[]
+include::{snippets}/put-bookmark/http-response.adoc[]
+include::{snippets}/put-bookmark/request-fields.adoc[]
+include::{snippets}/put-bookmark/response-fields.adoc[]
+
+=== [PUT] 여러 북마크의 그룹 수정
+include::{snippets}/put-multi-bookmark/http-request.adoc[]
+include::{snippets}/put-multi-bookmark/http-response.adoc[]
+include::{snippets}/put-multi-bookmark/request-fields.adoc[]
+include::{snippets}/put-multi-bookmark/response-fields.adoc[]
+
+=== [DELETE] 북마크 제거
+include::{snippets}/delete-bookmark/http-request.adoc[]
+include::{snippets}/delete-bookmark/http-response.adoc[]
+include::{snippets}/delete-bookmark/response-fields.adoc[]
+
+=== [GET] 북마크그룹 리스트
+include::{snippets}/get-bookmark-groups/http-request.adoc[]
+include::{snippets}/get-bookmark-groups/http-response.adoc[]
+include::{snippets}/get-bookmark-groups/response-fields.adoc[]
+
+=== [POST] 북마크그룹 추가
+include::{snippets}/save-bookmark-group/http-request.adoc[]
+include::{snippets}/save-bookmark-group/http-response.adoc[]
+include::{snippets}/save-bookmark-group/request-fields.adoc[]
+include::{snippets}/save-bookmark-group/response-fields.adoc[]
+
+=== [PUT] 북마크그룹 이름 수정
+include::{snippets}/rename-bookmark-group/http-request.adoc[]
+include::{snippets}/rename-bookmark-group/http-response.adoc[]
+include::{snippets}/rename-bookmark-group/request-fields.adoc[]
+include::{snippets}/rename-bookmark-group/response-fields.adoc[]
+
+=== [DELETE] 북마크그룹 삭제
+include::{snippets}/delete-bookmark-group/http-request.adoc[]
+include::{snippets}/delete-bookmark-group/http-response.adoc[]
+include::{snippets}/delete-bookmark-group/response-fields.adoc[]

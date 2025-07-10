@@ -1,6 +1,7 @@
 package io.github.haeun.newsgptback.controller;
 
 import io.github.haeun.newsgptback.common.enums.errorCode.AuthErrorCode;
+import io.github.haeun.newsgptback.common.enums.errorCode.BookmarkErrorCode;
 import io.github.haeun.newsgptback.common.enums.errorCode.RequestErrorCode;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,12 @@ public class DocsTest {
         }
         for (AuthErrorCode code : AuthErrorCode.values()) {
             sb.append("| ").append("Auth")
+                    .append("|").append(code.getHttpStatus())
+                    .append("| ").append(code.name())
+                    .append(" | ").append(code.getMessage()).append("\n");
+        }
+        for (BookmarkErrorCode code : BookmarkErrorCode.values()) {
+            sb.append("| ").append("Bookmark")
                     .append("|").append(code.getHttpStatus())
                     .append("| ").append(code.name())
                     .append(" | ").append(code.getMessage()).append("\n");

@@ -48,7 +48,8 @@ public class NewsControllerRestDocsTest {
                 "요약된 본문",
                 "사회",
                 List.of("키워드1", "키워드2"),
-                url
+                url,
+                0
         );
 
         // when
