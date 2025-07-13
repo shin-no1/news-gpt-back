@@ -73,7 +73,8 @@ public class NewsControllerRestDocsTest {
                                 fieldWithPath("summary").description("요약된 본문"),
                                 fieldWithPath("topic").description("기사 주제"),
                                 fieldWithPath("keywords").description("핵심 키워드 리스트"),
-                                fieldWithPath("url").description("기사 URL")
+                                fieldWithPath("url").description("기사 URL"),
+                                fieldWithPath("summaryHistoryId").description("기사 히스토리 ID")
                         )
                 ));
     }
