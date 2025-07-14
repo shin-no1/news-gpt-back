@@ -2,12 +2,12 @@ package io.github.haeun.newsgptback.infrastructure.gpt.loader;
 
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PromptLoader {
     public static String loadPrompt(String filename) {
@@ -27,7 +27,13 @@ public class PromptLoader {
             if (!resource.exists()) {
                 throw new RuntimeException("프롬프트 파일을 찾을 수 없음: " + resource.getPath());
             }
-            String content = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
+//            String content = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
+            String content;
+            try (InputStream inputStream = resource.getInputStream()) {
+                content = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                        .lines()
+                        .collect(Collectors.joining("\n"));
+            }
 
             String[] sections = content.split("=== ");
             for (String section : sections) {
