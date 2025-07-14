@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.restdocs.headers.HeaderDescriptor;
+import org.springframework.restdocs.headers.RequestHeadersSnippet;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -94,7 +94,7 @@ public class BookmarkControllerDocsTest {
                 .andDo(document("get-bookmarks",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         queryParameters(
                                 parameterWithName("groupId").description("북마크 그룹 ID")
                         ),
@@ -129,7 +129,7 @@ public class BookmarkControllerDocsTest {
                 .andDo(document("save-bookmark",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         requestFields(
                                 fieldWithPath("summaryHistoryId").description("북마크 생성할 컨텐츠 ID"),
                                 fieldWithPath("groupId").description("생성할 북마크의 GROUP_ID")
@@ -161,7 +161,7 @@ public class BookmarkControllerDocsTest {
                 .andExpect(status().isOk())
                 .andDo(document("get-bookmark-groups",
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         responseFields(
                                 fieldWithPath("[].id").description("북마크 그룹 ID"),
                                 fieldWithPath("[].name").description("그룹 이름"),
@@ -201,7 +201,7 @@ public class BookmarkControllerDocsTest {
                 .andDo(document("put-bookmark",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         pathParameters(
                                 parameterWithName("bookmarkId").description("수정할 북마크 ID")
                         ),
@@ -250,7 +250,7 @@ public class BookmarkControllerDocsTest {
                 .andDo(document("put-multi-bookmark",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         requestFields(
                                 fieldWithPath("bookmarkIds").description("이동할 북마크 ID 목록"),
                                 fieldWithPath("groupId").description("현재 그룹 ID"),
@@ -283,7 +283,7 @@ public class BookmarkControllerDocsTest {
                 .andDo(document("delete-bookmark",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         pathParameters(
                                 parameterWithName("bookmarkId").description("삭제할 북마크 ID")
                         ),
@@ -316,7 +316,7 @@ public class BookmarkControllerDocsTest {
                 .andDo(document("save-bookmark-group",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         requestFields(
                                 fieldWithPath("name").description("북마크 그룹 이름")
                         ),
@@ -351,7 +351,7 @@ public class BookmarkControllerDocsTest {
                 .andDo(document("rename-bookmark-group",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         pathParameters(
                                 parameterWithName("groupId").description("수정할 그룹 ID")
                         ),
@@ -386,7 +386,7 @@ public class BookmarkControllerDocsTest {
                 .andDo(document("delete-bookmark-group",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
-                        requestHeaders(getRequestAuthHeader()),
+                        getRequestAuthHeader(),
                         pathParameters(
                                 parameterWithName("groupId").description("삭제할 그룹 ID")
                         ),
@@ -398,8 +398,10 @@ public class BookmarkControllerDocsTest {
                 ));
     }
 
-    private HeaderDescriptor getRequestAuthHeader() {
-        return headerWithName("Authorization").description("JWT 인증 토큰");
+    private RequestHeadersSnippet getRequestAuthHeader() {
+        return requestHeaders(
+                headerWithName("Authorization").description("JWT 인증 토큰")
+        );
     }
 
 }

@@ -1,0 +1,5 @@
+=== [GET] 사용자 정보
+include::{snippets}/get-my-info/http-request.adoc[]
+include::{snippets}/get-my-info/http-response.adoc[]
+include::{snippets}/get-my-info/response-fields.adoc[]
+

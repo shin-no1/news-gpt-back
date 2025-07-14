@@ -12,3 +12,22 @@ include::{snippets}/auth-verify-code/request-fields.adoc[]
 include::{snippets}/auth-signup/http-request.adoc[]
 include::{snippets}/auth-signup/http-response.adoc[]
 include::{snippets}/auth-signup/request-fields.adoc[]
+include::{snippets}/auth-signup/response-body.adoc[]
+
+=== [POST] 로그인
+include::{snippets}/auth-login/http-request.adoc[]
+include::{snippets}/auth-login/http-response.adoc[]
+include::{snippets}/auth-login/request-fields.adoc[]
+include::{snippets}/auth-login/response-fields.adoc[]
+
+=== [POST] 로그아웃
+include::{snippets}/auth-logout/http-request.adoc[]
+include::{snippets}/auth-logout/http-response.adoc[]
+include::{snippets}/auth-logout/request-headers.adoc[]
+include::{snippets}/auth-logout/response-fields.adoc[]
+
+=== [POST] 토큰 재발행
+include::{snippets}/auth-reissue/http-request.adoc[]
+include::{snippets}/auth-reissue/http-response.adoc[]
+include::{snippets}/auth-reissue/request-headers.adoc[]
+include::{snippets}/auth-reissue/response-fields.adoc[]

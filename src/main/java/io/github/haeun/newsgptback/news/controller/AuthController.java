@@ -51,7 +51,7 @@ public class AuthController {
                 .status(HttpStatus.OK)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new HashMap<>() {{
-                    put("message", "로그아웃 되었습니다.");
+                    put("message", "회원가입이 완료되었습니다.");
                 }});
     }
 

@@ -3,16 +3,20 @@
 :source-highlighter: highlightjs
 :snippets: {snippets}
 
-== 1. 회원 가입
+== 1. Auth
 include::service/auth.adoc[]
 
-== 2. 뉴스 요약 요청
+== 2. User
+include::service/user.adoc[]
+
+== 3. Service
+=== [POST] 뉴스 요약
 include::{snippets}/analyze-url/http-request.adoc[]
 include::{snippets}/analyze-url/http-response.adoc[]
 include::{snippets}/analyze-url/request-fields.adoc[]
 include::{snippets}/analyze-url/response-fields.adoc[]
 
-== 3. 북마크
+== 4. Bookmark
 include::service/bookmark.adoc[]
 
 == * ERROR CODE
