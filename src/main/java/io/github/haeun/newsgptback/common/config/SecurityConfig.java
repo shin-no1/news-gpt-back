@@ -5,6 +5,7 @@ import io.github.haeun.newsgptback.common.filter.MdcFilter;
 import io.github.haeun.newsgptback.common.handler.CustomAccessDeniedHandler;
 import io.github.haeun.newsgptback.common.security.CustomAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,13 +40,17 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/user/me").permitAll()
-                        .requestMatchers("/api/user/**").authenticated()
-                        .requestMatchers("/api/news/**").permitAll()
-                        .requestMatchers("/api/bookmarks/**").authenticated()
-                        .requestMatchers("/api/bookmark-groups/**").authenticated()
-                        .anyRequest().authenticated()
+                            .requestMatchers(
+                                    PathRequest.toStaticResources().atCommonLocations()
+                            ).permitAll()
+                            .requestMatchers("/docs/**", "/snippets/**", "/.well-known/**").permitAll()
+                            .requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers("/api/user/me").permitAll()
+                            .requestMatchers("/api/user/**").authenticated()
+                            .requestMatchers("/api/news/**").permitAll()
+                            .requestMatchers("/api/bookmarks/**").authenticated()
+                            .requestMatchers("/api/bookmark-groups/**").authenticated()
+                            .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPoint)

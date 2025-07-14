@@ -199,6 +199,10 @@
                         <configuration>
                             <backend>html</backend>
                             <doctype>book</doctype>
+                            <outputDirectory>${project.build.outputDirectory}/static/docs</outputDirectory>
+                            <attributes>
+                                <snippets>${project.build.directory}/generated-snippets</snippets>
+                            </attributes>
                         </configuration>
                     </execution>
                 </executions>
@@ -209,9 +213,6 @@
                         <version>${spring-restdocs.version}</version>
                     </dependency>
                 </dependencies>
-                <configuration>
-                    <outputDirectory>${project.build.outputDirectory}/static/docs</outputDirectory>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
