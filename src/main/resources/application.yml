@@ -8,15 +8,15 @@ spring:
     import: optional:dotenv:.env
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
     show-sql: true
   datasource:
     url: jdbc:mariadb://localhost:3306/news_gpt
-    username: ENC(lBPAGZTtXv7Eov0O6BMY9w==)
-    password: ENC(lBPAGZTtXv7Eov0O6BMY9w==)
+    username: ENC(aFxMFlNfA3H7H1wqUvrHXQ==)
+    password: ENC(ogo2AvtjlhoS7fjr9yM7Qb5woYZ9I0FX)
     driver-class-name: org.mariadb.jdbc.Driver
   data:
     redis:
