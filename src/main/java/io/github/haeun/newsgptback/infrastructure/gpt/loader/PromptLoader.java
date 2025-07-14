@@ -24,6 +24,9 @@ public class PromptLoader {
             Map<String, String> promptMap = new HashMap<>();
 
             ClassPathResource resource = new ClassPathResource("prompts/" + versionFilePath);
+            if (!resource.exists()) {
+                throw new RuntimeException("프롬프트 파일을 찾을 수 없음: " + resource.getPath());
+            }
             String content = Files.readString(resource.getFile().toPath(), StandardCharsets.UTF_8);
 
             String[] sections = content.split("=== ");
