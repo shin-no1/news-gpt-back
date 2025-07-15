@@ -5,7 +5,7 @@ AI 기반 뉴스 요약 및 분석 서비스 **NewsGPT**의 백엔드 서버입�
 
 API 명세 자동화, JWT 인증, 캐시 및 이력 저장 전략 등 실무 중심의 설계를 적용했습니다.
 
-> 🔗 [API 문서 (Spring REST Docs)](https://api.know-that.dev/docs/index.htm)  
+> 🔗 [API 문서 (Spring REST Docs)](https://api.know-that.dev/docs/index.html)  
 > 🔗 [Frontend GitHub 보기](https://github.com/shin-no1/news-gpt-front)  
 > 🔗 [구현 보기](https://newsgpt.know-that.dev/news)  
 
@@ -71,7 +71,7 @@ API 명세 자동화, JWT 인증, 캐시 및 이력 저장 전략 등 실무 중
 - REST Docs로 API 문서 자동 생성 → HTML 문서로 정적 배포
 - 예외 상황 및 인증 처리까지 명세 포함
 
-🔗 [API 문서 보기](https://api.know-that.dev/docs/index.htm)
+🔗 [API 문서 보기](https://api.know-that.dev/docs/index.html)
 
 ---
 
