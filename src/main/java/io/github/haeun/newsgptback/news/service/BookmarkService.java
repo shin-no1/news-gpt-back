@@ -139,7 +139,6 @@ public class BookmarkService {
      * @param userId 사용자 ID
      * @return 북마크 그룹 목록
      */
-    @Transactional(readOnly = true)
     public List<BookmarkGroupsResponse> getBookmarkGroup(long userId) {
         List<BookmarkGroup> bookmarkGroups = getBookmarkGroupByUser(userId);
         return bookmarkGroups.stream()
